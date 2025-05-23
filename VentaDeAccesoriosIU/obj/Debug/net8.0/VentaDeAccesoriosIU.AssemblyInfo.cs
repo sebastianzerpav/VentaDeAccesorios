@@ -11,12 +11,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("VentaDeAccesoriosAPI")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("VentaDeAccesoriosIU")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5cf1bdf953b5025a0b24ca6ccea818a0f65acc16")]
-[assembly: System.Reflection.AssemblyProductAttribute("VentaDeAccesoriosAPI")]
-[assembly: System.Reflection.AssemblyTitleAttribute("VentaDeAccesoriosAPI")]
+[assembly: System.Reflection.AssemblyProductAttribute("VentaDeAccesoriosIU")]
+[assembly: System.Reflection.AssemblyTitleAttribute("VentaDeAccesoriosIU")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Generado por la clase WriteCodeFragment de MSBuild.
