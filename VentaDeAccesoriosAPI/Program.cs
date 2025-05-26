@@ -1,4 +1,5 @@
 using VentaDeAccesoriosAPI.Data.Configuration;
+using VentaDeAccesoriosAPI.Services.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 //Db Connection
 DbConfiguration.Configuration(builder.Services, builder.Configuration);
+
+//Services configuration 
+ServicesConfiguration.Configuration(builder.Services);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
