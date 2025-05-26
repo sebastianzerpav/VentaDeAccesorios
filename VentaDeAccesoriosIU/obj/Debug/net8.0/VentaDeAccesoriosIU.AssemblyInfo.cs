@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VentaDeAccesoriosIU")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fcd7c12e9ae5f5a77de51bd78b839d19539bed4b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+46ae13b6419fa21cfb82ec7e146ab2364c46e1d4")]
 [assembly: System.Reflection.AssemblyProductAttribute("VentaDeAccesoriosIU")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VentaDeAccesoriosIU")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
