@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VentaDeAccesoriosAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5cf1bdf953b5025a0b24ca6ccea818a0f65acc16")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fcd7c12e9ae5f5a77de51bd78b839d19539bed4b")]
 [assembly: System.Reflection.AssemblyProductAttribute("VentaDeAccesoriosAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VentaDeAccesoriosAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
