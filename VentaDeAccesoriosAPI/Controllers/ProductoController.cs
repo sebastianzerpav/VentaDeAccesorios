@@ -1,45 +1,190 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.EntityFrameworkCore;
+using VentaDeAccesoriosAPI.Data.Models;
+using VentaDeAccesoriosAPI.Services;
 
 namespace VentaDeAccesoriosAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductoController : ControllerBase
+    public class ProductosController : ControllerBase
     {
-        //Estos métodos se generan al crear el controlador, hay que implementar los que necesitamos
+        private readonly IProductoService _productoService;
 
-        // GET: api/<ProductoController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        public ProductosController(IProductoService productoService)
         {
-            return new string[] { "value1", "value2" };
+            _productoService = productoService;
         }
 
-        // GET api/<ProductoController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/<ProductoController>
+        /// <summary>
+        /// Crear un nuevo producto
+        /// </summary>
+        /// <param name="producto">Datos del producto a crear</param>
+        /// <returns>Resultado de la operación</returns>
         [HttpPost]
-        public void Post([FromBody] string value)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Insert([FromBody] Producto producto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // Validación adicional
+            if (string.IsNullOrWhiteSpace(producto.Nombre))
+                return BadRequest("El nombre del producto es requerido");
+
+            bool respuesta = await _productoService.Insert(producto);
+            if (respuesta)
+            {
+                return CreatedAtAction(nameof(GetById), new { id = producto.IdProducto },
+                    new { message = "Producto creado exitosamente", producto });
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error interno del servidor al crear el producto");
+            }
         }
 
-        // PUT api/<ProductoController>/5
+        /// <summary>
+        /// Actualizar un producto existente
+        /// </summary>
+        /// <param name="id">ID del producto a actualizar</param>
+        /// <param name="producto">Nuevos datos del producto</param>
+        /// <returns>Resultado de la operación</returns>
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] Producto producto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (id <= 0)
+                return BadRequest("ID inválido");
+
+            // Verificar que el producto existe primero
+            var productoExistente = await _productoService.GetById(id);
+            if (productoExistente == null)
+                return NotFound($"Producto con ID {id} no encontrado");
+
+            bool respuesta = await _productoService.Update(id, producto);
+            if (respuesta)
+            {
+                return Ok(new { message = "Producto actualizado exitosamente" });
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error interno del servidor al actualizar el producto");
+            }
         }
 
-        // DELETE api/<ProductoController>/5
+        /// <summary>
+        /// Eliminar un producto
+        /// </summary>
+        /// <param name="id">ID del producto a eliminar</param>
+        /// <returns>Resultado de la operación</returns>
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
+            if (id <= 0)
+                return BadRequest("ID inválido");
+
+            // Verificar que el producto existe primero
+            var productoExistente = await _productoService.GetById(id);
+            if (productoExistente == null)
+                return NotFound($"Producto con ID {id} no encontrado");
+
+            bool respuesta = await _productoService.Delete(id);
+            if (respuesta)
+            {
+                return Ok(new { message = "Producto eliminado exitosamente" });
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error interno del servidor al eliminar el producto");
+            }
+        }
+
+        /// <summary>
+        /// Obtener todos los productos
+        /// </summary>
+        /// <returns>Lista de productos</returns>
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+                var productos = await _productoService.GetAll();
+                return Ok(new
+                {
+                    count = productos.Count,
+                    data = productos
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error interno del servidor al obtener los productos");
+            }
+        }
+
+        /// <summary>
+        /// Obtener producto por ID
+        /// </summary>
+        /// <param name="id">ID del producto</param>
+        /// <returns>Producto encontrado</returns>
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetById([FromRoute] int id)
+        {
+            if (id <= 0)
+                return BadRequest("ID inválido");
+
+            var producto = await _productoService.GetById(id);
+            if (producto == null)
+                return NotFound($"Producto con ID {id} no encontrado");
+
+            return Ok(producto);
+        }
+
+        // SERVICIO - GetByNombre corregido con todas las relaciones
+        
+
+        // CONTROLLER - GetByNombre endpoint corregido
+        /// <summary>
+        /// Buscar productos por nombre
+        /// </summary>
+        /// <param name="nombre">Nombre o parte del nombre a buscar</param>
+        /// <returns>Lista de productos que coinciden con la búsqueda</returns>
+        [HttpGet("buscar")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetByNombre([FromQuery] string nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+                return BadRequest("El parámetro 'nombre' es requerido");
+
+            var productos = await _productoService.GetByNombre(nombre);
+            return Ok(new
+            {
+                searchTerm = nombre,
+                count = productos.Count,
+                data = productos
+            });
         }
     }
 }
