@@ -17,6 +17,7 @@ namespace VentaDeAccesoriosAPI.Controllers
             this.usuarioService = usuarioService;
         }
 
+        
         [HttpPost("Insert")]
         public async Task<IActionResult> Insert([FromBody] Usuario usuario)
         {
@@ -74,7 +75,7 @@ namespace VentaDeAccesoriosAPI.Controllers
             }
         }
 
-        [AllowAnonymous]
+        
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {

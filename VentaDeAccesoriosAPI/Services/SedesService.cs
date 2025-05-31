@@ -31,7 +31,7 @@ namespace VentaDeAccesoriosAPI.Services
         {
             try
             {
-                Sede? foundSede = await context.Sedes.FindAsync(sede);
+                Sede? foundSede = await context.Sedes.FindAsync(id_sede);
                 if (foundSede == null)
                 {
                     return false;

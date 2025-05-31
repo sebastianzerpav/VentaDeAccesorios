@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace VentaDeAccesoriosAPI.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ProveedoresController : ControllerBase

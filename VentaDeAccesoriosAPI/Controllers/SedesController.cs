@@ -6,7 +6,7 @@ using VentaDeAccesoriosAPI.Services;
 
 namespace VentaDeAccesoriosAPI.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SedesController : ControllerBase
