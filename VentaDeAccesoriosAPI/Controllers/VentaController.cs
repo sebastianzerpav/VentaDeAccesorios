@@ -41,7 +41,7 @@ namespace VentaDeAccesoriosAPI.Controllers
             }
             else
             {
-                return StatusCode(500, "No pudo ser actualizado el Venta. Revisar consola de errores o revisar si existe objeto en la base de datos.");
+                return StatusCode(500, "No pudo ser actualizado la Venta. Revisar consola de errores o revisar si existe objeto en la base de datos.");
             }
         }
 

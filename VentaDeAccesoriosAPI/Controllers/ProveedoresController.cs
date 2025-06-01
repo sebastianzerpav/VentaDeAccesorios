@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VentaDeAccesoriosAPI.Data.Models;
 using VentaDeAccesoriosAPI.Services;
-using Microsoft.AspNetCore.Authorization;
+
 
 namespace VentaDeAccesoriosAPI.Controllers
 {

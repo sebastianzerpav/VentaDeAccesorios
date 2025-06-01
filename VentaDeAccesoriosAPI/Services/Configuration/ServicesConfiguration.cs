@@ -13,6 +13,7 @@ namespace VentaDeAccesoriosAPI.Services.Configuration
             services.AddScoped<IProveedoresService, ProveedoresService>();//proveedores service
             services.AddScoped<ITransportistasService, TransportistasService>();//Transportistas service
             services.AddScoped<IOfertaService, OfertaService>();//Oferta service
+            services.AddScoped<IEnvioService, EnvioService>();//Envio service
             services.AddScoped<IVentaService, VentaService>();//Oferta service
             services.AddScoped<ISedesService, SedesService>();//Sedes service
             services.AddScoped<IAuthService, AuthService>(); //Auth service

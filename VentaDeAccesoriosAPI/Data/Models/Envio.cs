@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace VentaDeAccesoriosAPI.Data.Models;
 
@@ -18,8 +19,8 @@ public partial class Envio
     public DateOnly? FechaEntrega { get; set; }
 
     public string? EstadoEnvio { get; set; }
-
+    [JsonIgnore]
     public virtual Transportista? IdTransportistaNavigation { get; set; }
-
+    [JsonIgnore]
     public virtual Venta? IdVentaNavigation { get; set; }
 }
