@@ -97,6 +97,38 @@ namespace VentaDeAccesoriosAPI.Services
                 return new List<Sede>();
             }
         }
+
+        public async Task<List<Sede>> GetByCity(string city)
+        {
+            try
+            {
+                List<Sede> sedes = await context.Sedes
+                    .Where(s => s.Ciudad.Contains(city))
+                    .ToListAsync();
+                return sedes;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new List<Sede>();
+            }
+        }
+
+        public async Task<List<Sede>> GetByCountry(string country)
+        {
+            try
+            {
+                List<Sede> sedes = await context.Sedes
+                    .Where(s => s.Pais.Contains(country))
+                    .ToListAsync();
+                return sedes;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new List<Sede>();
+            }
+        }
     }
     public interface ISedesService
     {
@@ -105,6 +137,9 @@ namespace VentaDeAccesoriosAPI.Services
         Task<bool> Delete(int id_sede);
         Task<List<Sede>> GetAll();
         Task<Sede?> GetById(int id_sede);
+        Task<List<Sede>> GetByCity(string city);
+
+        Task<List<Sede>> GetByCountry(string country);
 
     }
 

@@ -88,5 +88,33 @@ namespace VentaDeAccesoriosAPI.Controllers
                 return NotFound("No se encontraron Sedes");
             }
         }
+
+        [HttpGet("GetByCity/{city}")]
+        public async Task<IActionResult> GetByCity([FromRoute] string city)
+        {
+            List<Sede> sedes = await sedesService.GetByCity(city);
+            if (sedes.Count > 0)
+            {
+                return Ok(sedes);
+            }
+            else
+            {
+                return NotFound("No se encontraron Sedes en la ciudad especificada");
+            }
+        }
+
+        [HttpGet("GetByCountry/{country}")]
+        public async Task<IActionResult> GetByCountry([FromRoute] string country)
+        {
+            List<Sede> sedes = await sedesService.GetByCountry(country);
+            if (sedes.Count > 0)
+            {
+                return Ok(sedes);
+            }
+            else
+            {
+                return NotFound("No se encontraron Sedes en el país especificado");
+            }
+        }
     }
 }
