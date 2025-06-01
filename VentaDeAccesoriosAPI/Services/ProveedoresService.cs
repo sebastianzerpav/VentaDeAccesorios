@@ -99,6 +99,53 @@ namespace VentaDeAccesoriosAPI.Services
             }
         }
 
+        public async Task<List<Proveedores>> GetByName(string name)
+        {
+            try
+            {
+                List<Proveedores> proveedores = await context.Proveedores
+                    .Where(p => p.Nombre.Contains(name))
+                    .ToListAsync();
+                return proveedores;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new List<Proveedores>();
+            }
+        }
+        public async Task<List<Proveedores>> GetByCountry(string country)
+        {
+            try
+            {
+                List<Proveedores> proveedores = await context.Proveedores
+                    .Where(p => p.PaisOrigen.Contains(country))
+                    .ToListAsync();
+                return proveedores;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new List<Proveedores>();
+            }
+        }
+
+        public async Task<List<Proveedores>> GetByCity(string city)
+        {
+            try
+            {
+                List<Proveedores> proveedores = await context.Proveedores
+                    .Where(p => p.Ciudad.Contains(city))
+                    .ToListAsync();
+                return proveedores;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new List<Proveedores>();
+            }
+        }
+
     }
 
     public interface IProveedoresService
@@ -108,6 +155,10 @@ namespace VentaDeAccesoriosAPI.Services
         Task<bool> Delete(int id_proveedor);
         Task<List<Proveedores>> GetAll();
         Task<Proveedores?> GetById(int id_proveedor);
+        Task<List<Proveedores>> GetByName(string name);
+        Task<List<Proveedores>> GetByCountry(string country);
+        Task<List<Proveedores>> GetByCity(string city);
+
 
     }
 

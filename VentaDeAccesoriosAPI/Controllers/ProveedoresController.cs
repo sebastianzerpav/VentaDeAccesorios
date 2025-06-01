@@ -89,5 +89,49 @@ namespace VentaDeAccesoriosAPI.Controllers
                 return NotFound("No se encontraron proveedores");
             }
         }
+
+        [AllowAnonymous]
+        [HttpGet("GetByName/{name}")]
+        public async Task<IActionResult> GetByName([FromRoute] string name)
+        {
+            List<Proveedores> proveedores = await proveedoresService.GetByName(name);
+            if (proveedores.Count > 0)
+            {
+                return Ok(proveedores);
+            }
+            else
+            {
+                return NotFound("No se encontraron proveedores con ese nombre");
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("GetByCountry/{country}")]
+        public async Task<IActionResult> GetByCountry([FromRoute] string country)
+        {
+            List<Proveedores> proveedores = await proveedoresService.GetByCountry(country);
+            if (proveedores.Count > 0)
+            {
+                return Ok(proveedores);
+            }
+            else
+            {
+                return NotFound("No se encontraron proveedores de ese país");
+            }
+        }
+        [AllowAnonymous]
+        [HttpGet("GetByCity/{city}")]
+        public async Task<IActionResult> GetByCity([FromRoute] string city)
+        {
+            List<Proveedores> proveedores = await proveedoresService.GetByCity(city);
+            if (proveedores.Count > 0)
+            {
+                return Ok(proveedores);
+            }
+            else
+            {
+                return NotFound("No se encontraron proveedores en esa ciudad");
+            }
+        }
     }
 }
