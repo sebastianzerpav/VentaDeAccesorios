@@ -4,11 +4,11 @@ using VentaDeAccesoriosAPI.Data.Models;
 
 namespace VentaDeAccesoriosAPI.Services
 {
-    public class ProductoService : IProductoService
+    public class ProductosService : IProductosService
     {
         private readonly AppDbContext _context;
 
-        public ProductoService(AppDbContext context)
+        public ProductosService(AppDbContext context)
         {
             _context = context;
         }
@@ -129,9 +129,10 @@ namespace VentaDeAccesoriosAPI.Services
                 return new List<Producto>();
             }
         }
+
     }
 
-    public interface IProductoService
+    public interface IProductosService
     {
         Task<bool> Insert(Producto producto);
         Task<bool> Update(int id_producto, Producto producto);

@@ -1,73 +1,169 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using VentaDeAccesoriosAPI.Data;
 using VentaDeAccesoriosAPI.Data.Models;
-
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using System.Threading.Tasks;
+using System;
+using static VentaDeAccesoriosAPI.Data.Models.libLogin;
 
 namespace VentaDeAccesoriosAPI.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly AppDbContext context;
-        private readonly IConfiguration configuration;
+        private readonly AppDbContext _context;
+        private readonly IConfiguration _configuration;
 
         public AuthService(AppDbContext context, IConfiguration configuration)
         {
-            this.context = context;
-            this.configuration = configuration;
+            _context = context;
+            _configuration = configuration;
         }
 
-        private string GenerateToken(int idUsuario)
+        // LOGIN
+        public async Task<AuthResponse?> GetToken(AuthRequest authRequest)
         {
-            string key = configuration.GetValue<string>("JwtConfiguration:Key")!;
-            byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+            var user = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.CorreoElectronico == authRequest.Correo);
 
-            ClaimsIdentity claims = new ClaimsIdentity();
-            claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, idUsuario.ToString(), ClaimValueTypes.Integer32));
-
-            SymmetricSecurityKey securityKey = new SymmetricSecurityKey(keyBytes);
-            SigningCredentials credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
-
-            SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor
+            if (user == null || !VerifyPassword(authRequest.Contraseña!, user.ContrasenaHash))
             {
-                Subject = claims,
-                Expires = DateTime.UtcNow.AddMinutes(5),
-                SigningCredentials = credentials
+                return new AuthResponse
+                {
+                    Resultado = false,
+                    Mensaje = "Credenciales inválidas"
+                };
+            }
+
+            string token = GenerateToken(user.IdUsuario);
+
+            return new AuthResponse
+            {
+                Token = token,
+                Resultado = true,
+                Mensaje = "Autenticación exitosa"
+            };
+        }
+
+        // REGISTRO
+        public async Task<AuthResponse> Register(RegisterRequest registerRequest)
+        {
+            bool exists = await _context.Usuarios
+                .AnyAsync(u => u.CorreoElectronico == registerRequest.Correo);
+
+            if (exists)
+            {
+                return new AuthResponse
+                {
+                    Resultado = false,
+                    Mensaje = "El correo ya está registrado"
+                };
+            }
+
+            string hashedPassword = HashPassword(registerRequest.Contraseña);
+
+            var nuevoUsuario = new Usuario
+            {
+                Nombre = registerRequest.Nombre,
+                Apellido = registerRequest.Apellido,
+                CorreoElectronico = registerRequest.Correo,
+                ContrasenaHash = hashedPassword
             };
 
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            SecurityToken token = tokenHandler.CreateToken(securityTokenDescriptor);
-            string generatedJwt = tokenHandler.WriteToken(token);
+            _context.Usuarios.Add(nuevoUsuario);
+            await _context.SaveChangesAsync();
 
-            return generatedJwt;
-        }
-        public async Task<libLogin.AuthResponse?> GetToken(libLogin.AuthRequest authRequest)
+            string token = GenerateToken(nuevoUsuario.IdUsuario);
 
-        {
-            Usuario? foundedUser = context.Usuarios.FirstOrDefault(u => u.CorreoElectronico== authRequest.Correo && u.ContrasenaHash== authRequest.Contraseña);
-            if (foundedUser == null) { libLogin.AuthResponse? response = null; return response; }
-            else
+            return new AuthResponse
             {
-                string generatedJwt = GenerateToken(foundedUser.IdUsuario);
-                libLogin.AuthResponse response = new libLogin.AuthResponse
+                Token = token,
+                Resultado = true,
+                Mensaje = "Registro exitoso"
+            };
+        }
+
+        // VALIDAR TOKEN
+        public bool ValidateToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            string key = _configuration.GetValue<string>("JwtConfiguration:Key")!;
+            var keyBytes = Encoding.UTF8.GetBytes(key);
+
+            try
+            {
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
-                    Token = generatedJwt,
-                    Resultado = true,
-                    Mensaje = "Credenciales válidas. Autenticado."
-                };
-                return response;
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
+        // MÉTODOS PRIVADOS
 
+        private string GenerateToken(int idUsuario)
+        {
+            string key = _configuration.GetValue<string>("JwtConfiguration:Key")!;
+            var keyBytes = Encoding.UTF8.GetBytes(key);
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, idUsuario.ToString())
+            };
+
+            var credentials = new SigningCredentials(
+                new SymmetricSecurityKey(keyBytes),
+                SecurityAlgorithms.HmacSha256
+            );
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = credentials
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
+        }
+
+        private string HashPassword(string password)
+        {
+            var salt = Encoding.UTF8.GetBytes(_configuration["JwtConfiguration:Salt"] ?? "defaultSalt1234");
+
+            return Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: password,
+                salt: salt,
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 10000,
+                numBytesRequested: 256 / 8));
+        }
+
+        private bool VerifyPassword(string inputPassword, string hashedPassword)
+        {
+            return HashPassword(inputPassword) == hashedPassword;
+        }
     }
-
     public interface IAuthService
     {
-        Task<libLogin.AuthResponse> GetToken(libLogin.AuthRequest authRequest);
+        Task<AuthResponse?> GetToken(AuthRequest authRequest);
+        Task<AuthResponse> Register(RegisterRequest registerRequest);
+        bool ValidateToken(string token);
     }
 }

@@ -6,13 +6,14 @@ using VentaDeAccesoriosAPI.Services;
 
 namespace VentaDeAccesoriosAPI.Controllers
 {
-    [Authorize]
+    //[Authorize]  // Todas las acciones requieren autenticación
     [Route("api/[controller]")]
     [ApiController]
-    public class SedesController : ControllerBase
+    public class SedeController : ControllerBase
     {
-        private ISedesService sedesService;
-        public SedesController(ISedesService sedesService)
+        private readonly ISedesService sedesService;
+
+        public SedeController(ISedesService sedesService)
         {
             this.sedesService = sedesService;
         }
@@ -23,11 +24,11 @@ namespace VentaDeAccesoriosAPI.Controllers
             bool respuesta = await sedesService.Insert(sede);
             if (respuesta)
             {
-                return Ok("la Sede se ha insertado exitosamente");
+                return Ok("La sede se ha insertado exitosamente");
             }
             else
             {
-                return StatusCode(500, "No pudo insertarse la Sede. Revisar consola de errores.");
+                return StatusCode(500, "No pudo insertarse la sede. Revisar consola de errores.");
             }
         }
 
@@ -41,7 +42,7 @@ namespace VentaDeAccesoriosAPI.Controllers
             }
             else
             {
-                return StatusCode(500, "No pudo ser actualizada la sede. Revisar consola de errores o revisar si existe objeto en la base de datos.");
+                return StatusCode(500, "No pudo ser actualizada la sede. Revisar consola de errores o revisar si existe el objeto en la base de datos.");
             }
         }
 
@@ -55,11 +56,10 @@ namespace VentaDeAccesoriosAPI.Controllers
             }
             else
             {
-                return StatusCode(500, "No pudo ser eliminada la sede. Revisar consola de errores o revisar si existe objeto en la base de datos.");
+                return StatusCode(500, "No pudo ser eliminada la sede. Revisar consola de errores o verificar si existe el objeto en la base de datos.");
             }
         }
 
-        [AllowAnonymous]
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
@@ -74,19 +74,25 @@ namespace VentaDeAccesoriosAPI.Controllers
             }
         }
 
-        [AllowAnonymous]
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
-            List<Sede> sede = await sedesService.GetAll();
-            if (sede.Count > 0)
+            List<Sede> sedes = await sedesService.GetAll();
+            if (sedes.Count > 0)
             {
-                return Ok(sede);
+                return Ok(sedes);
             }
             else
             {
-                return NotFound("No se encontraron Sedes");
+                return NotFound("No se encontraron sedes");
             }
+        }
+        // GET: api/sedes/search?ciudad=Medellin&barrio=Centro&pais=Colombia
+        [HttpGet("search")]
+        public async Task<ActionResult<List<Sede>>> Search([FromQuery] string? ciudad, [FromQuery] string? barrio, [FromQuery] string? pais)
+        {
+            var results = await sedesService.Search(ciudad, barrio, pais);
+            return results;
         }
     }
 }

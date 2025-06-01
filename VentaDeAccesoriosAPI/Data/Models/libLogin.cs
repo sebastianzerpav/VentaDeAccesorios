@@ -1,4 +1,5 @@
-﻿namespace VentaDeAccesoriosAPI.Data.Models
+﻿using VentaDeAccesoriosAPI.Data.Models;
+namespace VentaDeAccesoriosAPI.Data.Models
 {
     public class libLogin
     {
@@ -15,5 +16,9 @@
 
             public string? Contraseña { get; set; }
         }
+
     }
 }
+
+
+

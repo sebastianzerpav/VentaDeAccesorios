@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations;
 
 namespace VentaDeAccesoriosAPI.Data.Models;
 
@@ -17,9 +19,12 @@ public partial class Usuario
 
     public bool? Estado { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<PedidosProveedores> PedidosProveedores { get; set; } = new List<PedidosProveedores>();
 
+    [JsonIgnore]
     public virtual ICollection<UsuariosRoles> UsuariosRoles { get; set; } = new List<UsuariosRoles>();
 
+    [JsonIgnore]
     public virtual ICollection<Venta> Venta { get; set; } = new List<Venta>();
 }

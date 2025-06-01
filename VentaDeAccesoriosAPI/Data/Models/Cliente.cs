@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace VentaDeAccesoriosAPI.Data.Models;
 
@@ -16,10 +17,10 @@ public partial class Cliente
     public string? CorreoElectronico { get; set; }
 
     public string? Direccion { get; set; }
-
+    [JsonIgnore]
     public virtual ICollection<ComentariosCliente> ComentariosClientes { get; set; } = new List<ComentariosCliente>();
-
+    [JsonIgnore]
     public virtual ICollection<Reclamo> Reclamos { get; set; } = new List<Reclamo>();
-
+    [JsonIgnore]
     public virtual ICollection<Venta> Venta { get; set; } = new List<Venta>();
 }

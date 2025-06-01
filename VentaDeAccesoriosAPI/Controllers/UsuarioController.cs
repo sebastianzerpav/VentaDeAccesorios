@@ -1,34 +1,33 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VentaDeAccesoriosAPI.Data.Models;
 using VentaDeAccesoriosAPI.Services;
-using Microsoft.AspNetCore.Authorization;
 
 namespace VentaDeAccesoriosAPI.Controllers
 {
-    [Authorize]
+    //[Authorize] // Protege todo el controlador por defecto
     [Route("api/[controller]")]
     [ApiController]
-    public class UsuariosController : ControllerBase
+    public class UsuarioController : ControllerBase
     {
-        private IUsuarioService usuarioService;
-        public UsuariosController(IUsuarioService usuarioService)
+        private readonly IUsuarioService usuarioService;
+
+        public UsuarioController(IUsuarioService usuarioService)
         {
             this.usuarioService = usuarioService;
         }
 
+        // Por si tenés un método público para login o registro
+        // [AllowAnonymous] le quita la protección a este método específico
+        [AllowAnonymous]
         [HttpPost("Insert")]
         public async Task<IActionResult> Insert([FromBody] Usuario usuario)
         {
             bool respuesta = await usuarioService.Insert(usuario);
             if (respuesta)
-            {
-                return Ok("Usuario insertado exitosamente");
-            }
+                return Ok("El usuario fue creado exitosamente.");
             else
-            {
-                return StatusCode(500, "No pudo insertarse el Usuario. Revisar consola de errores.");
-            }
+                return StatusCode(500, "Error al insertar el usuario.");
         }
 
         [HttpPut("Update/{id}")]
@@ -36,13 +35,9 @@ namespace VentaDeAccesoriosAPI.Controllers
         {
             bool respuesta = await usuarioService.Update(id, usuario);
             if (respuesta)
-            {
-                return Ok("Usuario actualizado exitosamente");
-            }
+                return Ok("Usuario actualizado correctamente.");
             else
-            {
-                return StatusCode(500, "No pudo ser actualizado el Usuario. Revisar consola de errores o revisar si existe objeto en la base de datos.");
-            }
+                return NotFound("No se encontró el usuario a actualizar.");
         }
 
         [HttpDelete("Delete/{id}")]
@@ -50,43 +45,29 @@ namespace VentaDeAccesoriosAPI.Controllers
         {
             bool respuesta = await usuarioService.Delete(id);
             if (respuesta)
-            {
-                return Ok("Usuario eliminado exitosamente");
-            }
+                return Ok("Usuario eliminado correctamente.");
             else
-            {
-                return StatusCode(500, "No pudo ser eliminado el usuario. Revisar consola de errores o revisar si existe objeto en la base de datos.");
-            }
+                return NotFound("No se encontró el usuario a eliminar.");
         }
 
-        [AllowAnonymous]
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             Usuario? usuario = await usuarioService.GetById(id);
             if (usuario != null)
-            {
                 return Ok(usuario);
-            }
             else
-            {
-                return NotFound("Usuario no encontrado");
-            }
+                return NotFound("Usuario no encontrado.");
         }
 
-        [AllowAnonymous]
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
-            List<Usuario> usuarios = await usuarioService.GetAll();
+            var usuarios = await usuarioService.GetAll();
             if (usuarios.Count > 0)
-            {
                 return Ok(usuarios);
-            }
             else
-            {
-                return NotFound("No se encontraron usuarios");
-            }
+                return NotFound("No hay usuarios registrados.");
         }
     }
 }

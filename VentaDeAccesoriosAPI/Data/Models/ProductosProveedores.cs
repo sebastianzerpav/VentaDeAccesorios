@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace VentaDeAccesoriosAPI.Data.Models;
 
@@ -14,8 +15,8 @@ public partial class ProductosProveedores
     public decimal? CostoUnitario { get; set; }
 
     public int? TiempoEntregaDias { get; set; }
-
+    [JsonIgnore]
     public virtual Producto? IdProductoNavigation { get; set; }
-
+    [JsonIgnore]
     public virtual Proveedores? IdProveedorNavigation { get; set; }
 }

@@ -3,17 +3,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VentaDeAccesoriosAPI.Data.Models;
 using VentaDeAccesoriosAPI.Services;
-using Microsoft.AspNetCore.Authorization;
 
 namespace VentaDeAccesoriosAPI.Controllers
 {
-    [Authorize]
+    //[Authorize]  // Todas las acciones requieren autenticación
     [Route("api/[controller]")]
     [ApiController]
-    public class ProveedoresController : ControllerBase
+    public class ProveedorController : ControllerBase
     {
-        private IProveedoresService proveedoresService;
-        public ProveedoresController(IProveedoresService proveedoresService)
+        private readonly IProveedoresService proveedoresService;
+
+        public ProveedorController(IProveedoresService proveedoresService)
         {
             this.proveedoresService = proveedoresService;
         }
@@ -24,7 +24,7 @@ namespace VentaDeAccesoriosAPI.Controllers
             bool respuesta = await proveedoresService.Insert(proveedores);
             if (respuesta)
             {
-                return Ok("Proveedores insertado exitosamente");
+                return Ok("Proveedor insertado exitosamente");
             }
             else
             {
@@ -60,7 +60,6 @@ namespace VentaDeAccesoriosAPI.Controllers
             }
         }
 
-        [AllowAnonymous]
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
@@ -75,7 +74,6 @@ namespace VentaDeAccesoriosAPI.Controllers
             }
         }
 
-        [AllowAnonymous]
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
@@ -88,6 +86,13 @@ namespace VentaDeAccesoriosAPI.Controllers
             {
                 return NotFound("No se encontraron proveedores");
             }
+        }
+        // GET: api/proveedores/buscar?nombre
+        [HttpGet("buscar")]
+        public async Task<IActionResult> Buscar([FromQuery] string? nombre, [FromQuery] string? ciudad, [FromQuery] string? pais)
+        {
+            var resultados = await proveedoresService.Buscar(nombre, ciudad, pais);
+            return Ok(resultados);
         }
     }
 }

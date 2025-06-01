@@ -1,13 +1,53 @@
-﻿namespace VentaDeAccesoriosAPI.Services.Configuration
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+namespace VentaDeAccesoriosAPI.Services.Configuration
 {
     public static class ServicesConfiguration
     {
-        //Este método se invoca en program.cs
-        public static void Configuration(IServiceCollection services) {
-            //services.AddScoped<ITorneoService, TorneoService>(); //Ejemplo de inyección para CRUD Torneos
-            services.AddScoped<IProductoService, ProductoService>();
+        public static void Configuration(IServiceCollection services)
+        {
+            services.AddScoped<IProductosService, ProductosService>();
+            services.AddScoped<IProveedoresService, ProveedoresService>();
+            services.AddScoped<ISedesService, SedesService>();
+            services.AddScoped<IUsuarioService, UsuariosService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IOfertasService, OfertasService>();
+            services.AddScoped<ITransportistasService, TransportistasService>();
+            services.AddScoped<IVentasService, VentasService>();
+            services.AddScoped<IEnviosService, EnviosService>();
+            services.AddScoped<IClientesService, ClientesService>();
+            services.AddScoped<IRolesService, RolesService>();
+            services.AddScoped<IPermisosService, PermisosService>();
+
+
         }
 
-        //Aqui puede configurarse servicio de Auth también en el futuro con otro metodo, o cualquier servicio de la app
+        public static void AuthConfiguration(IConfiguration configuration, IServiceCollection services)
+        {
+            var key = Encoding.ASCII.GetBytes(configuration["JwtConfiguration:Key"]);
+
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+            services.AddAuthorization();
+        }
     }
 }

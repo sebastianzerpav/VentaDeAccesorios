@@ -2,16 +2,19 @@
 using Microsoft.EntityFrameworkCore;
 using VentaDeAccesoriosAPI.Data.Models;
 using VentaDeAccesoriosAPI.Services;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace VentaDeAccesoriosAPI.Controllers
 {
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductosController : ControllerBase
     {
-        private readonly IProductoService _productoService;
+        private readonly IProductosService _productoService;
 
-        public ProductosController(IProductoService productoService)
+        public ProductosController(IProductosService productoService)
         {
             _productoService = productoService;
         }

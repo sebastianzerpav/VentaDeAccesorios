@@ -31,17 +31,21 @@ namespace VentaDeAccesoriosAPI.Services
         {
             try
             {
-                Sede? foundSede = await context.Sedes.FindAsync(sede);
+                // Buscar la sede existente usando el id, no el objeto
+                Sede? foundSede = await context.Sedes.FindAsync(id_sede);
+
                 if (foundSede == null)
                 {
                     return false;
                 }
-                else
-                {
-                    context.Entry(foundSede).CurrentValues.SetValues(sede);
-                    await context.SaveChangesAsync();
-                    return true;
-                }
+
+                // Actualizar los valores del objeto encontrado con los del objeto recibido
+                context.Entry(foundSede).CurrentValues.SetValues(sede);
+
+                // Guardar cambios en la base de datos
+                await context.SaveChangesAsync();
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -49,6 +53,8 @@ namespace VentaDeAccesoriosAPI.Services
                 return false;
             }
         }
+
+
 
         public async Task<bool> Delete(int id_sede)
         {
@@ -97,6 +103,32 @@ namespace VentaDeAccesoriosAPI.Services
                 return new List<Sede>();
             }
         }
+        public async Task<List<Sede>> Search(string? ciudad, string? barrio, string? pais)
+        {
+            try
+            {
+                // Empieza la consulta base
+                IQueryable<Sede> query = context.Sedes.AsQueryable();
+
+                // Filtra solo si se pasa algún valor no nulo ni vacío
+                if (!string.IsNullOrWhiteSpace(ciudad))
+                    query = query.Where(s => s.Ciudad.Contains(ciudad));
+
+                if (!string.IsNullOrWhiteSpace(barrio))
+                    query = query.Where(s => s.Barrio.Contains(barrio));
+
+                if (!string.IsNullOrWhiteSpace(pais))
+                    query = query.Where(s => s.Pais.Contains(pais));
+
+                return await query.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new List<Sede>();
+            }
+        }
+
     }
     public interface ISedesService
     {
@@ -105,6 +137,8 @@ namespace VentaDeAccesoriosAPI.Services
         Task<bool> Delete(int id_sede);
         Task<List<Sede>> GetAll();
         Task<Sede?> GetById(int id_sede);
+        Task<List<Sede>> Search(string? ciudad, string? barrio, string? pais);
+
 
     }
 

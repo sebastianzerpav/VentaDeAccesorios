@@ -4,10 +4,10 @@ using VentaDeAccesoriosAPI.Data.Models;
 
 namespace VentaDeAccesoriosAPI.Services
 {
-    
     public class ProveedoresService : IProveedoresService
     {
         public readonly AppDbContext context;
+
         public ProveedoresService(AppDbContext context)
         {
             this.context = context;
@@ -56,7 +56,10 @@ namespace VentaDeAccesoriosAPI.Services
             try
             {
                 Proveedores? foundProveedores = await context.Proveedores.FindAsync(id_proveedor);
-                if (foundProveedores == null) { return false; }
+                if (foundProveedores == null)
+                {
+                    return false;
+                }
                 else
                 {
                     context.Proveedores.Remove(foundProveedores);
@@ -99,6 +102,36 @@ namespace VentaDeAccesoriosAPI.Services
             }
         }
 
+        // Método para buscar por nombre, ciudad y país opcionalmente
+        public async Task<List<Proveedores>> Buscar(string? nombre, string? ciudad, string? pais)
+        {
+            try
+            {
+                var query = context.Proveedores.AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(nombre))
+                {
+                    query = query.Where(p => p.Nombre != null && p.Nombre.ToLower().Contains(nombre.ToLower()));
+                }
+
+                if (!string.IsNullOrWhiteSpace(ciudad))
+                {
+                    query = query.Where(p => p.Ciudad != null && p.Ciudad.ToLower().Contains(ciudad.ToLower()));
+                }
+
+                if (!string.IsNullOrWhiteSpace(pais))
+                {
+                    query = query.Where(p => p.PaisOrigen != null && p.PaisOrigen.ToLower().Contains(pais.ToLower()));
+                }
+
+                return await query.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en Buscar: {ex.Message}");
+                return new List<Proveedores>();
+            }
+        }
     }
 
     public interface IProveedoresService
@@ -109,6 +142,7 @@ namespace VentaDeAccesoriosAPI.Services
         Task<List<Proveedores>> GetAll();
         Task<Proveedores?> GetById(int id_proveedor);
 
+      
+        Task<List<Proveedores>> Buscar(string? nombre, string? ciudad, string? pais);
     }
-
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace VentaDeAccesoriosAPI.Data.Models;
 
@@ -15,5 +16,6 @@ public partial class Oferta
 
     public DateOnly? FechaFin { get; set; }
 
+    [JsonIgnore]
     public virtual Producto? IdProductoNavigation { get; set; }
 }

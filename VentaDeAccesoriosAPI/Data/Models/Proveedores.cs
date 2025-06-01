@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations;
+
 
 namespace VentaDeAccesoriosAPI.Data.Models;
 
@@ -21,7 +24,8 @@ public partial class Proveedores
 
     public string? Tipo { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<PedidosProveedores> PedidosProveedores { get; set; } = new List<PedidosProveedores>();
-
+    [JsonIgnore]
     public virtual ICollection<ProductosProveedores> ProductosProveedores { get; set; } = new List<ProductosProveedores>();
 }
