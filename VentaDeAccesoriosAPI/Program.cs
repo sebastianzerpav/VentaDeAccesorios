@@ -7,6 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 //Db Connection
 DbConfiguration.Configuration(builder.Services, builder.Configuration);
+//Authentication and Authorization Configuration
+ServicesConfiguration.AuthConfiguration(builder.Configuration, builder.Services);
+//Services
+ServicesConfiguration.Configuration(builder.Services);
 
 //Services configuration 
 ServicesConfiguration.Configuration(builder.Services);
