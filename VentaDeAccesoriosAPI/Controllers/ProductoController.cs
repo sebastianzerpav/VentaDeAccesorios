@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using VentaDeAccesoriosAPI.Data.Models;
 using VentaDeAccesoriosAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 
-
 namespace VentaDeAccesoriosAPI.Controllers
 {
-    //[Authorize]
+    [Authorize(Roles = "Cliente")]  // Solo usuarios con rol Admin pueden acceder
     [Route("api/[controller]")]
     [ApiController]
     public class ProductosController : ControllerBase
@@ -27,13 +25,13 @@ namespace VentaDeAccesoriosAPI.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]  // Para acceso no autorizado
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Insert([FromBody] Producto producto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Validación adicional
             if (string.IsNullOrWhiteSpace(producto.Nombre))
                 return BadRequest("El nombre del producto es requerido");
 
@@ -50,12 +48,6 @@ namespace VentaDeAccesoriosAPI.Controllers
             }
         }
 
-        /// <summary>
-        /// Actualizar un producto existente
-        /// </summary>
-        /// <param name="id">ID del producto a actualizar</param>
-        /// <param name="producto">Nuevos datos del producto</param>
-        /// <returns>Resultado de la operación</returns>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -69,7 +61,6 @@ namespace VentaDeAccesoriosAPI.Controllers
             if (id <= 0)
                 return BadRequest("ID inválido");
 
-            // Verificar que el producto existe primero
             var productoExistente = await _productoService.GetById(id);
             if (productoExistente == null)
                 return NotFound($"Producto con ID {id} no encontrado");
@@ -86,11 +77,6 @@ namespace VentaDeAccesoriosAPI.Controllers
             }
         }
 
-        /// <summary>
-        /// Eliminar un producto
-        /// </summary>
-        /// <param name="id">ID del producto a eliminar</param>
-        /// <returns>Resultado de la operación</returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -101,7 +87,6 @@ namespace VentaDeAccesoriosAPI.Controllers
             if (id <= 0)
                 return BadRequest("ID inválido");
 
-            // Verificar que el producto existe primero
             var productoExistente = await _productoService.GetById(id);
             if (productoExistente == null)
                 return NotFound($"Producto con ID {id} no encontrado");
@@ -118,10 +103,6 @@ namespace VentaDeAccesoriosAPI.Controllers
             }
         }
 
-        /// <summary>
-        /// Obtener todos los productos
-        /// </summary>
-        /// <returns>Lista de productos</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -136,18 +117,13 @@ namespace VentaDeAccesoriosAPI.Controllers
                     data = productos
                 });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     "Error interno del servidor al obtener los productos");
             }
         }
 
-        /// <summary>
-        /// Obtener producto por ID
-        /// </summary>
-        /// <param name="id">ID del producto</param>
-        /// <returns>Producto encontrado</returns>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -164,15 +140,6 @@ namespace VentaDeAccesoriosAPI.Controllers
             return Ok(producto);
         }
 
-        // SERVICIO - GetByNombre corregido con todas las relaciones
-        
-
-        // CONTROLLER - GetByNombre endpoint corregido
-        /// <summary>
-        /// Buscar productos por nombre
-        /// </summary>
-        /// <param name="nombre">Nombre o parte del nombre a buscar</param>
-        /// <returns>Lista de productos que coinciden con la búsqueda</returns>
         [HttpGet("buscar")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

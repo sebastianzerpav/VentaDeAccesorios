@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System.Threading.Tasks;
 using System;
 using static VentaDeAccesoriosAPI.Data.Models.libLogin;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace VentaDeAccesoriosAPI.Services
 {
@@ -28,6 +30,8 @@ namespace VentaDeAccesoriosAPI.Services
         public async Task<AuthResponse?> GetToken(AuthRequest authRequest)
         {
             var user = await _context.Usuarios
+                .Include(u => u.UsuariosRoles)
+                    .ThenInclude(ur => ur.IdRolNavigation)
                 .FirstOrDefaultAsync(u => u.CorreoElectronico == authRequest.Correo);
 
             if (user == null || !VerifyPassword(authRequest.Contraseña!, user.ContrasenaHash))
@@ -39,7 +43,7 @@ namespace VentaDeAccesoriosAPI.Services
                 };
             }
 
-            string token = GenerateToken(user.IdUsuario);
+            string token = GenerateToken(user);
 
             return new AuthResponse
             {
@@ -71,13 +75,37 @@ namespace VentaDeAccesoriosAPI.Services
                 Nombre = registerRequest.Nombre,
                 Apellido = registerRequest.Apellido,
                 CorreoElectronico = registerRequest.Correo,
-                ContrasenaHash = hashedPassword
+                ContrasenaHash = hashedPassword,
+                Estado = true
             };
 
             _context.Usuarios.Add(nuevoUsuario);
             await _context.SaveChangesAsync();
 
-            string token = GenerateToken(nuevoUsuario.IdUsuario);
+            // Buscar rol
+            var rol = await _context.Roles
+                .FirstOrDefaultAsync(r => r.NombreRol.ToLower() == registerRequest.Rol.ToLower());
+
+            if (rol == null)
+            {
+                return new AuthResponse
+                {
+                    Resultado = false,
+                    Mensaje = $"El rol '{registerRequest.Rol}' no existe."
+                };
+            }
+
+            // Asignar rol
+            var usuarioRol = new UsuariosRoles
+            {
+                IdUsuario = nuevoUsuario.IdUsuario,
+                IdRol = rol.IdRol
+            };
+
+            _context.UsuariosRoles.Add(usuarioRol);
+            await _context.SaveChangesAsync();
+
+            string token = GenerateToken(nuevoUsuario);
 
             return new AuthResponse
             {
@@ -115,15 +143,24 @@ namespace VentaDeAccesoriosAPI.Services
 
         // MÉTODOS PRIVADOS
 
-        private string GenerateToken(int idUsuario)
+        private string GenerateToken(Usuario usuario)
         {
             string key = _configuration.GetValue<string>("JwtConfiguration:Key")!;
             var keyBytes = Encoding.UTF8.GetBytes(key);
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, idUsuario.ToString())
+                new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
+                new Claim(ClaimTypes.Name, usuario.CorreoElectronico ?? "")
             };
+
+            foreach (var rol in usuario.UsuariosRoles.Select(ur => ur.IdRolNavigation))
+            {
+                if (rol != null && !string.IsNullOrWhiteSpace(rol.NombreRol))
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, rol.NombreRol));
+                }
+            }
 
             var credentials = new SigningCredentials(
                 new SymmetricSecurityKey(keyBytes),
@@ -160,6 +197,7 @@ namespace VentaDeAccesoriosAPI.Services
             return HashPassword(inputPassword) == hashedPassword;
         }
     }
+
     public interface IAuthService
     {
         Task<AuthResponse?> GetToken(AuthRequest authRequest);
