@@ -1,0 +1,146 @@
+﻿@page "/productos"
+@layout UsuariosLayout
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12" id="dvMenu">
+                @* Aquí puedes insertar el menú si es dinámico *@
+            </div>
+
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Productos</h3>
+                    </div>
+
+                    <EditForm Model="@producto" OnValidSubmit="HandleValidSubmit">
+                        <div class="card-body">
+                            <div class="card card-gray-dark">
+                                <div class="card-header">
+                                    <h3 class="card-title">Datos de Producto</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-1">
+                                            <div class="form-group">
+                                                <label for="dato1">ID</label>
+                                                <InputText id="dato1" class="form-control" @bind-Value="producto.Dato1" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="dato2">Nombre</label>
+                                                <InputText id="dato2" class="form-control" @bind-Value="producto.Dato2" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="dato3">Stock</label>
+                                                <InputText id="dato3" class="form-control" @bind-Value="producto.Dato3" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="dato4">Precio de compra</label>
+                                                <InputText id="dato4" class="form-control" @bind-Value="producto.Dato4" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="dato5">Precio de venta</label>
+                                                <InputText id="dato5" class="form-control" @bind-Value="producto.Dato5" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-2">
+                                        <div class="col-md-9">
+                                            <div class="form-group">
+                                                <label for="dato6">Descripción</label>
+                                                <InputText id="dato6" class="form-control" @bind-Value="producto.Dato6" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="dato7">Garantía (Meses)</label>
+                                                <InputText id="dato7" class="form-control" @bind-Value="producto.Dato7" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card card-danger mt-3">
+                                <div class="card-header">
+                                    <h3 class="card-title">PROCESO</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Insertar">INSERTAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Actualizar">ACTUALIZAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Eliminar">ELIMINAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Consultar">CONSULTAR</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+
+                    <div class="card-footer">
+                        <div id="dvMensaje">@mensaje</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private Producto producto = new();
+    private string mensaje = "";
+
+    private void HandleValidSubmit()
+    {
+        mensaje = "Formulario válido.";
+    }
+
+    private void Insertar()
+    {
+        mensaje = "Insertar ejecutado.";
+    }
+
+    private void Actualizar()
+    {
+        mensaje = "Actualizar ejecutado.";
+    }
+
+    private void Eliminar()
+    {
+        mensaje = "Eliminar ejecutado.";
+    }
+
+    private void Consultar()
+    {
+        mensaje = "Consultar ejecutado.";
+    }
+
+    public class Producto
+    {
+        public string Dato1 { get; set; }  // ID
+        public string Dato2 { get; set; }  // Nombre
+        public string Dato3 { get; set; }  // Stock
+        public string Dato4 { get; set; }  // Precio compra
+        public string Dato5 { get; set; }  // Precio venta
+        public string Dato6 { get; set; }  // Descripción
+        public string Dato7 { get; set; }  // Garantía (Meses)
+    }
+}

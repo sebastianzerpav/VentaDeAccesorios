@@ -1,0 +1,139 @@
+﻿@page "/usuarios"
+@layout UsuariosLayout
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12" id="dvMenu">
+                @* Aquí puedes insertar el menú si es dinámico *@
+            </div>
+
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Usuarios</h3>
+                    </div>
+
+                    <EditForm Model="@usuario" OnValidSubmit="HandleValidSubmit">
+                        <div class="card-body">
+                            <div class="card card-gray-dark">
+                                <div class="card-header">
+                                    <h3 class="card-title">Datos de Usuario</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-1">
+                                            <div class="form-group">
+                                                <label for="dato1">ID</label>
+                                                <InputText id="dato1" class="form-control" @bind-Value="usuario.Dato1" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="dato2">Nombre</label>
+                                                <InputText id="dato2" class="form-control" @bind-Value="usuario.Dato2" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="dato3">Apellido</label>
+                                                <InputText id="dato3" class="form-control" @bind-Value="usuario.Dato3" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="dato4">Correo</label>
+                                                <InputText id="dato4" class="form-control" @bind-Value="usuario.Dato4" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="dato5">Contraseña</label>
+                                                <InputText id="dato5" class="form-control" @bind-Value="usuario.Dato5" type="password" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="form-group">
+                                                <label for="cboEstado">Estado</label>
+                                                <select id="cboEstado" class="form-control" @bind="usuario.Estado">
+                                                    <option value="1">Activo</option>
+                                                    <option value="2">Inactivo</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card card-danger mt-3">
+                                <div class="card-header">
+                                    <h3 class="card-title">PROCESO</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Insertar">INSERTAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Actualizar">ACTUALIZAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Eliminar">ELIMINAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Consultar">CONSULTAR</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+
+                    <div class="card-footer">
+                        <div id="dvMensaje">@mensaje</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private Usuario usuario = new();
+    private string mensaje = "";
+
+    private void HandleValidSubmit()
+    {
+        mensaje = "Formulario válido.";
+    }
+
+    private void Insertar()
+    {
+        mensaje = "Insertar ejecutado.";
+    }
+
+    private void Actualizar()
+    {
+        mensaje = "Actualizar ejecutado.";
+    }
+
+    private void Eliminar()
+    {
+        mensaje = "Eliminar ejecutado.";
+    }
+
+    private void Consultar()
+    {
+        mensaje = "Consultar ejecutado.";
+    }
+
+    public class Usuario
+    {
+        public string Dato1 { get; set; } // ID
+        public string Dato2 { get; set; } // Nombre
+        public string Dato3 { get; set; } // Apellido
+        public string Dato4 { get; set; } // Correo
+        public string Dato5 { get; set; } // Contraseña
+        public int Estado { get; set; } = 1; // Activo por defecto
+    }
+}
