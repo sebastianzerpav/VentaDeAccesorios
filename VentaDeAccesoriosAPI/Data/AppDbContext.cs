@@ -67,6 +67,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<UsuariosRoles> UsuariosRoles { get; set; }
 
     public virtual DbSet<Venta> Ventas { get; set; }
+    public virtual DbSet<ImagenProducto> ImagenProducto { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -404,22 +406,41 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Producto>(entity =>
         {
-            entity.HasKey(e => e.IdProducto).HasName("PK__Producto__FF341C0D609B45E6");
+            entity.HasKey(e => e.IdProducto);
+            entity.ToTable("Producto");  // Nombre exacto de la tabla en la BD
 
             entity.Property(e => e.IdProducto).HasColumnName("id_producto");
+            entity.Property(e => e.Nombre).HasMaxLength(150).HasColumnName("nombre");
             entity.Property(e => e.Descripcion).HasColumnName("descripcion");
-            entity.Property(e => e.GarantiaMeses).HasColumnName("garantia_meses");
-            entity.Property(e => e.Nombre)
-                .HasMaxLength(150)
-                .HasColumnName("nombre");
-            entity.Property(e => e.PrecioCompra)
-                .HasColumnType("decimal(18, 2)")
-                .HasColumnName("precio_compra");
-            entity.Property(e => e.PrecioVenta)
-                .HasColumnType("decimal(18, 2)")
-                .HasColumnName("precio_venta");
+            entity.Property(e => e.PrecioCompra).HasColumnType("decimal(18,2)").HasColumnName("precio_compra");
+            entity.Property(e => e.PrecioVenta).HasColumnType("decimal(18,2)").HasColumnName("precio_venta");
             entity.Property(e => e.StockTotal).HasColumnName("stock_total");
+            entity.Property(e => e.GarantiaMeses).HasColumnName("garantia_meses");
+
+            entity.HasOne(p => p.ImagenProducto)
+                .WithOne(ip => ip.Producto)
+                .HasForeignKey<ImagenProducto>(ip => ip.IdProducto)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Producto_ImagenProducto");
         });
+        modelBuilder.Entity<ImagenProducto>(entity =>
+        {
+            entity.HasKey(e => e.IdProducto);
+            entity.ToTable("ImagenProducto"); // Asegúrate que sea así en la BD
+
+            entity.Property(e => e.IdProducto).HasColumnName("id_producto");
+            entity.Property(e => e.Imagen).HasColumnName("imagen");
+            entity.Property(e => e.NombreArchivo).HasMaxLength(255).HasColumnName("nombre_archivo");
+            entity.Property(e => e.TipoContenido).HasMaxLength(100).HasColumnName("tipo_contenido");
+
+            entity.HasOne(e => e.Producto)
+                .WithOne(p => p.ImagenProducto)
+                .HasForeignKey<ImagenProducto>(e => e.IdProducto)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_ImagenProducto_Producto");
+        });
+
+
 
         modelBuilder.Entity<ProductosProveedores>(entity =>
         {

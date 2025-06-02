@@ -5,7 +5,7 @@ using VentaDeAccesoriosAPI.Services;
 
 namespace VentaDeAccesoriosAPI.Controllers
 {
-    //[Authorize] // Protege todo el controlador por defecto
+    //[Authorize(Roles = "Administrador,Vendedor")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsuarioController : ControllerBase
@@ -19,7 +19,6 @@ namespace VentaDeAccesoriosAPI.Controllers
 
         // Por si tenés un método público para login o registro
         // [AllowAnonymous] le quita la protección a este método específico
-        [AllowAnonymous]
         [HttpPost("Insert")]
         public async Task<IActionResult> Insert([FromBody] Usuario usuario)
         {

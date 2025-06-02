@@ -53,7 +53,7 @@ namespace VentaDeAccesoriosAPI.Services
         {
             try
             {
-                Oferta? foundOferta = await context.Ofertas.FindAsync(oferta);
+                Oferta? foundOferta = await context.Ofertas.FindAsync(id_oferta);
                 if (foundOferta == null)
                 {
                     return false;

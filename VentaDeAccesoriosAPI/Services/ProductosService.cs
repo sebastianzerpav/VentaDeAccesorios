@@ -17,7 +17,6 @@ namespace VentaDeAccesoriosAPI.Services
         {
             try
             {
-                // Validaciones básicas
                 if (string.IsNullOrWhiteSpace(producto.Nombre))
                     return false;
 
@@ -27,7 +26,6 @@ namespace VentaDeAccesoriosAPI.Services
             }
             catch (Exception ex)
             {
-                // Considera usar un logger en lugar de Console.WriteLine
                 Console.WriteLine($"Error en Insert: {ex.Message}");
                 return false;
             }
@@ -41,7 +39,7 @@ namespace VentaDeAccesoriosAPI.Services
                 if (foundProducto == null)
                     return false;
 
-                // Actualizar campos específicos para evitar sobrescribir el ID
+                // Actualiza solo los campos editables
                 foundProducto.Nombre = producto.Nombre;
                 foundProducto.Descripcion = producto.Descripcion;
                 foundProducto.PrecioCompra = producto.PrecioCompra;
@@ -112,14 +110,11 @@ namespace VentaDeAccesoriosAPI.Services
                     return new List<Producto>();
 
                 return await _context.Productos
+                    // Incluye las relaciones necesarias si las tienes configuradas
                     .Include(p => p.ComentariosClientes)
                     .Include(p => p.DetallePedidosProveedores)
                     .Include(p => p.DetalleVenta)
                     .Include(p => p.Garantia)
-                    //.Include(p => p.HistorialStocks)
-                    //.Include(p => p.MovimientosInventarios)
-                    //.Include(p => p.Oferta)
-                   // .Include(p => p.ProductosProveedores)
                     .Where(p => p.Nombre != null && p.Nombre.ToLower().Contains(nombre.ToLower()))
                     .ToListAsync();
             }
@@ -129,7 +124,6 @@ namespace VentaDeAccesoriosAPI.Services
                 return new List<Producto>();
             }
         }
-
     }
 
     public interface IProductosService

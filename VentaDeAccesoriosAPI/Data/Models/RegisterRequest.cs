@@ -12,8 +12,16 @@
         {
             get => string.IsNullOrWhiteSpace(_rol) || _rol.Trim().ToLower() == "null"
                 ? "Cliente"
-                : _rol;
+                : Capitalizar(_rol.Trim());
             set => _rol = value;
+        }
+
+        private string Capitalizar(string texto)
+        {
+            if (string.IsNullOrEmpty(texto))
+                return texto;
+
+            return char.ToUpper(texto[0]) + texto.Substring(1).ToLower();
         }
     }
 }

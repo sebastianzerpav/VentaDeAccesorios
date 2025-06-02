@@ -1,4 +1,4 @@
-using VentaDeAccesoriosAPI.Data.Configuration;
+ï»¿using VentaDeAccesoriosAPI.Data.Configuration;
 using VentaDeAccesoriosAPI.Services.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +16,7 @@ ServicesConfiguration.Configuration(builder.Services);
 
 builder.Services.AddControllers();
 
-// Swagger/OpenAPI con configuración para JWT
+// Swagger/OpenAPI con configuraciÃ³n para JWT
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -59,7 +59,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();  // Muy importante para activar la autenticación
+app.UseAuthentication();  // Muy importante para activar la autenticaciÃ³n
 app.UseAuthorization();
 
 app.MapControllers();
