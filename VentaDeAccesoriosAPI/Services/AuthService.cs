@@ -49,7 +49,15 @@ namespace VentaDeAccesoriosAPI.Services
 
         {
             Usuario? foundedUser = context.Usuarios.FirstOrDefault(u => u.CorreoElectronico== authRequest.Correo && u.ContrasenaHash== authRequest.Contraseña);
-            if (foundedUser == null) { libLogin.AuthResponse? response = null; return response; }
+            if (foundedUser == null) 
+            {
+                return new libLogin.AuthResponse
+                {
+                    Token = string.Empty,
+                    Resultado = false,
+                    Mensaje = "Credenciales inválidas."
+                };
+            }
             else
             {
                 string generatedJwt = GenerateToken(foundedUser.IdUsuario);
