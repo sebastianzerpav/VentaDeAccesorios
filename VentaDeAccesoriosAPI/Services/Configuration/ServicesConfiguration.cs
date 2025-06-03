@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using static VentaDeAccesoriosAPI.Services.DetalleVentaService;
 
 namespace VentaDeAccesoriosAPI.Services.Configuration
 {
@@ -17,6 +18,7 @@ namespace VentaDeAccesoriosAPI.Services.Configuration
             services.AddScoped<IOfertasService, OfertasService>();
             services.AddScoped<ITransportistasService, TransportistasService>();
             services.AddScoped<IVentasService, VentasService>();
+            services.AddScoped<IDetalleVentaService, DetalleVentaService>();
             services.AddScoped<IEnviosService, EnviosService>();
             services.AddScoped<IClientesService, ClientesService>();
             services.AddScoped<IRolesService, RolesService>();
