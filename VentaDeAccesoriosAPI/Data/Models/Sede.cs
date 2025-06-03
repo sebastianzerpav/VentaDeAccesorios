@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.ComponentModel.DataAnnotations;
+
 
 namespace VentaDeAccesoriosAPI.Data.Models;
 
@@ -22,6 +22,7 @@ public partial class Sede
     public string? Telefono { get; set; }
 
     public string? EmailContacto { get; set; }
+
 
     [JsonIgnore]
     public virtual ICollection<HistorialStock> HistorialStocks { get; set; } = new List<HistorialStock>();

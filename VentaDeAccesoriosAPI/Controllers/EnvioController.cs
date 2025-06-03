@@ -5,7 +5,9 @@ using VentaDeAccesoriosAPI.Data.Models;
 using VentaDeAccesoriosAPI.Services;
 
 namespace VentaDeAccesoriosAPI.Controllers
+
 {
+
 
     //[Authorize]
     [Route("api/[controller]")]
@@ -13,8 +15,10 @@ namespace VentaDeAccesoriosAPI.Controllers
     public class EnvioController : Controller
     {
 
+
         private IEnviosService envioService;
         public EnvioController(IEnviosService envioService)
+
         {
             this.envioService = envioService;
         }

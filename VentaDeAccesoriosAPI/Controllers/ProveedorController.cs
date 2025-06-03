@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using VentaDeAccesoriosAPI.Data.Models;
 using VentaDeAccesoriosAPI.Services;
 
+
+
+
 namespace VentaDeAccesoriosAPI.Controllers
 {
     //[Authorize]  // Todas las acciones requieren autenticación
@@ -87,12 +90,13 @@ namespace VentaDeAccesoriosAPI.Controllers
                 return NotFound("No se encontraron proveedores");
             }
         }
-        // GET: api/proveedores/buscar?nombre
+
         [HttpGet("buscar")]
         public async Task<IActionResult> Buscar([FromQuery] string? nombre, [FromQuery] string? ciudad, [FromQuery] string? pais)
         {
             var resultados = await proveedoresService.Buscar(nombre, ciudad, pais);
             return Ok(resultados);
+
         }
     }
 }

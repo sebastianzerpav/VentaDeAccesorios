@@ -11,8 +11,10 @@ namespace VentaDeAccesoriosAPI.Controllers
     [ApiController]
     public class OfertaController : Controller
     {
+
         private IOfertasService ofertaService;
         public OfertaController(IOfertasService ofertaService)
+
         {
             this.ofertaService = ofertaService;
         }
@@ -90,4 +92,6 @@ namespace VentaDeAccesoriosAPI.Controllers
         }
 
     }
+
 }
+

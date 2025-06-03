@@ -14,6 +14,7 @@ public partial class Transportista
 
     public string? Empresa { get; set; }
 
+
     [JsonIgnore]
     public virtual ICollection<Envio> Envios { get; set; } = new List<Envio>();
 }

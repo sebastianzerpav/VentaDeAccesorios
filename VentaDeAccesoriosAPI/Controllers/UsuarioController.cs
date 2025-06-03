@@ -8,7 +8,9 @@ namespace VentaDeAccesoriosAPI.Controllers
     //[Authorize(Roles = "Administrador,Vendedor")]
     [Route("api/[controller]")]
     [ApiController]
+
     public class UsuarioController : ControllerBase
+
     {
         private readonly IUsuarioService usuarioService;
 
@@ -17,8 +19,9 @@ namespace VentaDeAccesoriosAPI.Controllers
             this.usuarioService = usuarioService;
         }
 
-        // Por si tenés un método público para login o registro
+
         // [AllowAnonymous] le quita la protección a este método específico
+
         [HttpPost("Insert")]
         public async Task<IActionResult> Insert([FromBody] Usuario usuario)
         {
@@ -58,6 +61,7 @@ namespace VentaDeAccesoriosAPI.Controllers
             else
                 return NotFound("Usuario no encontrado.");
         }
+
 
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()

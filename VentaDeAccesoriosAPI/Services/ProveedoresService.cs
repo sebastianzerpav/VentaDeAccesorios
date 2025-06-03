@@ -102,6 +102,7 @@ namespace VentaDeAccesoriosAPI.Services
             }
         }
 
+
         // Método para buscar por nombre, ciudad y país opcionalmente
         public async Task<List<Proveedores>> Buscar(string? nombre, string? ciudad, string? pais)
         {
@@ -132,6 +133,7 @@ namespace VentaDeAccesoriosAPI.Services
                 return new List<Proveedores>();
             }
         }
+
     }
 
     public interface IProveedoresService
@@ -141,8 +143,7 @@ namespace VentaDeAccesoriosAPI.Services
         Task<bool> Delete(int id_proveedor);
         Task<List<Proveedores>> GetAll();
         Task<Proveedores?> GetById(int id_proveedor);
-
-      
+       
         Task<List<Proveedores>> Buscar(string? nombre, string? ciudad, string? pais);
     }
 }

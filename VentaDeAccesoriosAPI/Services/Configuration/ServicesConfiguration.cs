@@ -8,6 +8,7 @@ namespace VentaDeAccesoriosAPI.Services.Configuration
     {
         public static void Configuration(IServiceCollection services)
         {
+
             services.AddScoped<IProductosService, ProductosService>();
             services.AddScoped<IProveedoresService, ProveedoresService>();
             services.AddScoped<ISedesService, SedesService>();
@@ -23,6 +24,7 @@ namespace VentaDeAccesoriosAPI.Services.Configuration
             services.AddScoped<IUsuariosRolesService, UsuariosRolesService>();
             services.AddScoped<IRolesPermisosService, RolesPermisosService>();
             services.AddScoped<IImagenProductoService, ImagenProductoService>();
+
 
 
         }

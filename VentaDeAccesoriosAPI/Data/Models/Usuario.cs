@@ -1,7 +1,9 @@
+
 ﻿    using System;
     using System.Collections.Generic;
     using System.Text.Json.Serialization;
     using System.ComponentModel.DataAnnotations;
+
 
     namespace VentaDeAccesoriosAPI.Data.Models;
 
@@ -17,6 +19,7 @@
 
         public string? ContrasenaHash { get; set; }
 
+
         public bool? Estado { get; set; }
 
         [JsonIgnore]
@@ -28,3 +31,4 @@
         [JsonIgnore]
         public virtual ICollection<Venta> Venta { get; set; } = new List<Venta>();
     }
+
