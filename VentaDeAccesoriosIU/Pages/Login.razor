@@ -1,5 +1,7 @@
 ﻿@page "/"
 @layout LoginLayout
+@inject NavigationManager Navigation
+@inject HttpClient Http
 
 <div class="login-box">
     <div class="card card-outline card-primary">
@@ -9,9 +11,12 @@
         <div class="card-body">
             <p class="login-box-msg">Iniciar Sesión</p>
 
-            <form>
+            <EditForm Model="authRequest" OnValidSubmit="HandleLogin">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
                 <div class="input-group mb-3">
-                    <input type="email" class="form-control" placeholder="Correo">
+                    <InputText type="email" class="form-control" placeholder="Correo" @bind-Value="authRequest.Correo" />
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-envelope"></span>
@@ -19,23 +24,63 @@
                     </div>
                 </div>
                 <div class="input-group mb-3">
-                    <input type="password" class="form-control" placeholder="Contraseña">
+                    <InputText type="password" class="form-control" placeholder="Contraseña" @bind-Value="authRequest.Contraseña" />
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-lock"></span>
                         </div>
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col-12 mt-4">
-                        <button type="submit" class="btn btn-primary btn-block" onclick="">Ingresar</button>
+                        <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
                     </div>
                 </div>
-            </form>
+            </EditForm>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="text-danger mt-2">@errorMessage</div>
+            }
         </div>
     </div>
 </div>
 
 @code {
-    
+    private Models.libLogin.AuthRequest authRequest = new();
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("https://localhost:7248/api/Auth/login", authRequest);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var authResponse = await response.Content.ReadFromJsonAsync<Models.libLogin.AuthResponse>();
+                if (authResponse != null && authResponse.Resultado)
+                {
+                    // Guarda el token en localStorage
+                    await JS.InvokeVoidAsync("localStorage.setItem", "authToken", authResponse.Token);
+                    Navigation.NavigateTo("/usuarios");
+                }
+                else
+                {
+                    errorMessage = "Credenciales inválidas.";
+                }
+            }
+            else
+            {
+                errorMessage = "Error de autenticación.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    [Inject] public IJSRuntime JS { get; set; } = default!;
 }

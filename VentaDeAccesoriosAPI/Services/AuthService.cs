@@ -86,7 +86,9 @@ namespace VentaDeAccesoriosAPI.Services
             var rol = await _context.Roles
                 .FirstOrDefaultAsync(r => r.NombreRol.ToLower() == registerRequest.Rol.ToLower());
 
+
             if (rol == null)
+
             {
                 return new AuthResponse
                 {

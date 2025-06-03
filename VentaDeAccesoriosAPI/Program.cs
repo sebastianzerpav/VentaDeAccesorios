@@ -1,6 +1,7 @@
 ﻿using VentaDeAccesoriosAPI.Data.Configuration;
 using VentaDeAccesoriosAPI.Services.Configuration;
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -48,6 +49,18 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// CORS Configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(MyAllowSpecificOrigins,
+        builder =>
+        {
+            builder.WithOrigins("https://localhost:7248", "https://localhost:7074") // Add your allowed origins here
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 // Configure HTTP request pipeline
@@ -59,7 +72,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();  // Muy importante para activar la autenticación
+
+app.UseCors(MyAllowSpecificOrigins);
+
+
 app.UseAuthorization();
 
 app.MapControllers();
