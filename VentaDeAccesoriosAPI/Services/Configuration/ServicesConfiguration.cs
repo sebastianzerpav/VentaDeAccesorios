@@ -20,9 +20,9 @@ namespace VentaDeAccesoriosAPI.Services.Configuration
             services.AddScoped<IEnviosService, EnviosService>();
             services.AddScoped<IClientesService, ClientesService>();
             services.AddScoped<IRolesService, RolesService>();
-            services.AddScoped<IPermisosService, PermisosService>();
+            //services.AddScoped<IPermisosService, PermisosService>();
             services.AddScoped<IUsuariosRolesService, UsuariosRolesService>();
-            services.AddScoped<IRolesPermisosService, RolesPermisosService>();
+           // services.AddScoped<IRolesPermisosService, RolesPermisosService>();
             services.AddScoped<IImagenProductoService, ImagenProductoService>();
 
 
