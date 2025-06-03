@@ -76,14 +76,20 @@ namespace VentaDeAccesoriosAPI.Services
         {
             try
             {
-                Oferta? foundOferta = await context.Ofertas.FindAsync(id_oferta);
-                if (foundOferta == null) { return false; }
-                else
+                var foundOferta= await context.Ofertas.FindAsync(id_oferta);
+                if (foundOferta == null)
+                    return false;
+
+                var entry = context.Entry(foundOferta);
+                foreach (var collection in entry.Collections)
                 {
-                    context.Ofertas.Remove(foundOferta);
-                    await context.SaveChangesAsync();
-                    return true;
+                    await collection.LoadAsync();
+                    (collection.CurrentValue as System.Collections.IList)?.Clear();
                 }
+
+                context.Ofertas.Remove(foundOferta);
+                await context.SaveChangesAsync();
+                return true;
             }
             catch (Exception ex)
             {

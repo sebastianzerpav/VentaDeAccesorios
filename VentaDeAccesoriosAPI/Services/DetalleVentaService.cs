@@ -13,7 +13,6 @@ namespace VentaDeAccesoriosAPI.Services
             this.context = context;
         }
 
-
         public async Task<bool> Insert(DetalleVenta detalle)
         {
             try
@@ -26,7 +25,7 @@ namespace VentaDeAccesoriosAPI.Services
                     return false;
                 }
 
-                // 2. Obtener el producto y su precio
+                // 2. Obtener el producto
                 var producto = await context.Productos.FirstOrDefaultAsync(p => p.IdProducto == detalle.IdProducto);
                 if (producto == null)
                 {
@@ -34,21 +33,33 @@ namespace VentaDeAccesoriosAPI.Services
                     return false;
                 }
 
-                // 3. Asignar el precio y calcular el subtotal
-                detalle.PrecioUnitario = producto.PrecioVenta; // Suponiendo que la clase Producto tiene una propiedad Precio
+                
+                var hoy = DateOnly.FromDateTime(DateTime.Now);
+
+                // 4. Verificar si hay una oferta activa
+                var oferta = await context.Ofertas.FirstOrDefaultAsync(o =>
+                    o.IdProducto == detalle.IdProducto &&
+                    o.FechaInicio <= hoy &&
+                    o.FechaFin >= hoy);
+
+                // 5. Asignar el precio según si hay oferta activa
+                detalle.PrecioUnitario = oferta != null ? oferta.PrecioPromocional : producto.PrecioVenta;
+
+                // 6. Calcular subtotal
                 detalle.Subtotal = detalle.Cantidad * detalle.PrecioUnitario;
 
-                // 4. Guardar en base de datos
+                // 7. Guardar en base de datos
                 context.DetalleVentas.Add(detalle);
                 await context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine($"Error al insertar detalle de venta: {ex}");
                 return false;
             }
-         }
+        }
 
         public async Task<bool> Update(int id_detalle, DetalleVenta detalle)
         {
@@ -84,34 +95,55 @@ namespace VentaDeAccesoriosAPI.Services
                     return false;
                 }
 
-                // Asignar valores
-                detalle.PrecioUnitario = producto.PrecioVenta;
+                // Obtener la fecha actual como DateOnly
+                var hoy = DateOnly.FromDateTime(DateTime.Now);
+
+                // Verificar si hay oferta activa
+                var oferta = await context.Ofertas.FirstOrDefaultAsync(o =>
+                    o.IdProducto == detalle.IdProducto &&
+                    o.FechaInicio <= hoy &&
+                    o.FechaFin >= hoy);
+
+                // Asignar precio según si hay oferta activa
+                detalle.PrecioUnitario = oferta != null ? oferta.PrecioPromocional: producto.PrecioVenta;
+
+                // Calcular subtotal
                 detalle.Subtotal = detalle.Cantidad * detalle.PrecioUnitario;
 
-                // Actualizar el registro
+                // Actualizar el registro en la base de datos
                 context.Entry(foundDetalle).CurrentValues.SetValues(detalle);
                 await context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine($"Error al actualizar detalle de venta: {ex}");
                 return false;
             }
         }
+
+
+
 
         public async Task<bool> Delete(int id_detalle)
         {
             try
             {
-                DetalleVenta? FoundDetalle = await context.DetalleVentas.FindAsync(id_detalle);
-                if (FoundDetalle == null) { return false; }
-                else
+                var foundDetalle = await context.DetalleVentas.FindAsync(id_detalle);
+                if (foundDetalle == null)
+                    return false;
+
+                var entry = context.Entry(foundDetalle);
+                foreach (var collection in entry.Collections)
                 {
-                    context.DetalleVentas.Remove(FoundDetalle);
-                    await context.SaveChangesAsync();
-                    return true;
+                    await collection.LoadAsync();
+                    (collection.CurrentValue as System.Collections.IList)?.Clear();
                 }
+
+                context.DetalleVentas.Remove(foundDetalle);
+                await context.SaveChangesAsync();
+                return true;
             }
             catch (Exception ex)
             {

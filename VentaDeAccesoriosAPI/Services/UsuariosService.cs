@@ -53,14 +53,20 @@ namespace VentaDeAccesoriosAPI.Services
         {
             try
             {
-                Usuario? foundUsuario = await context.Usuarios.FindAsync(id_usuario);
-                if (foundUsuario == null) { return false; }
-                else
+                var foundUsuario = await context.Usuarios.FindAsync(id_usuario);
+                if (foundUsuario == null)
+                    return false;
+
+                var entry = context.Entry(foundUsuario);
+                foreach (var collection in entry.Collections)
                 {
-                    context.Usuarios.Remove(foundUsuario);
-                    await context.SaveChangesAsync();
-                    return true;
+                    await collection.LoadAsync();
+                    (collection.CurrentValue as System.Collections.IList)?.Clear();
                 }
+
+                context.Usuarios.Remove(foundUsuario);
+                await context.SaveChangesAsync();
+                return true;
             }
             catch (Exception ex)
             {

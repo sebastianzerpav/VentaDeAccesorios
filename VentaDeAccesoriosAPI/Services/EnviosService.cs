@@ -69,17 +69,20 @@ namespace VentaDeAccesoriosAPI.Services
         {
             try
             {
-                Envio? foundEnvio = await context.Envios.FindAsync(id_envio);
+                var foundEnvio = await context.Envios.FindAsync(id_envio);
                 if (foundEnvio == null)
-                {
                     return false;
-                }
-                else
+
+                var entry = context.Entry(foundEnvio);
+                foreach (var collection in entry.Collections)
                 {
-                    context.Envios.Remove(foundEnvio);
-                    await context.SaveChangesAsync();
-                    return true;
+                    await collection.LoadAsync();
+                    (collection.CurrentValue as System.Collections.IList)?.Clear();
                 }
+
+                context.Envios.Remove(foundEnvio);
+                await context.SaveChangesAsync();
+                return true;
             }
             catch (Exception ex)
             {

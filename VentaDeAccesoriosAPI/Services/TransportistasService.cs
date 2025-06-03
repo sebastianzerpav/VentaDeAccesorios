@@ -54,14 +54,21 @@ namespace VentaDeAccesoriosAPI.Services
         {
             try
             {
-                Transportista? foundTransportista = await context.Transportistas.FindAsync(id_transportista);
-                if (foundTransportista == null) { return false; }
-                else
+                var foundtransportista = await context.Transportistas.FindAsync(id_transportista);
+
+                if (foundtransportista == null)
+                    return false;
+
+                var entry = context.Entry(foundtransportista);
+                foreach (var collection in entry.Collections)
                 {
-                    context.Transportistas.Remove(foundTransportista);
-                    await context.SaveChangesAsync();
-                    return true;
+                    await collection.LoadAsync();
+                    (collection.CurrentValue as System.Collections.IList)?.Clear();
                 }
+
+                context.Transportistas.Remove(foundtransportista);
+                await context.SaveChangesAsync();
+                return true;
             }
             catch (Exception ex)
             {

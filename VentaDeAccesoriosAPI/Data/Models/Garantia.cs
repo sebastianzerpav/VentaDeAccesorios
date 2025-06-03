@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace VentaDeAccesoriosAPI.Data.Models;
 
@@ -16,10 +17,10 @@ public partial class Garantia
     public DateOnly? FechaFin { get; set; }
 
     public string? Estado { get; set; }
-
+    [JsonIgnore]
     public virtual ICollection<AtencionesGarantia> AtencionesGarantia { get; set; } = new List<AtencionesGarantia>();
-
+    [JsonIgnore]
     public virtual Producto? IdProductoNavigation { get; set; }
-
+    [JsonIgnore]
     public virtual Venta? IdVentaNavigation { get; set; }
 }

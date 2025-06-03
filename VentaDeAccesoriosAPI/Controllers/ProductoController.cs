@@ -73,7 +73,7 @@ namespace VentaDeAccesoriosAPI.Controllers
         {
             var resultado = await _productoService.Delete(id);
             if (!resultado)
-                return NotFound("Producto no encontrado o error al eliminar");
+                return NotFound("Producto no encontrado error al eliminar (primero eliminar imagenes)");
 
             return NoContent();
         }

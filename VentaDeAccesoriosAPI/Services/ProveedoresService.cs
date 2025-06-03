@@ -55,17 +55,20 @@ namespace VentaDeAccesoriosAPI.Services
         {
             try
             {
-                Proveedores? foundProveedores = await context.Proveedores.FindAsync(id_proveedor);
-                if (foundProveedores == null)
-                {
+                var foundProveedor = await context.Proveedores.FindAsync(id_proveedor);
+                if (foundProveedor == null)
                     return false;
-                }
-                else
+
+                var entry = context.Entry(foundProveedor);
+                foreach (var collection in entry.Collections)
                 {
-                    context.Proveedores.Remove(foundProveedores);
-                    await context.SaveChangesAsync();
-                    return true;
+                    await collection.LoadAsync();
+                    (collection.CurrentValue as System.Collections.IList)?.Clear();
                 }
+
+                context.Proveedores.Remove(foundProveedor);
+                await context.SaveChangesAsync();
+                return true;
             }
             catch (Exception ex)
             {

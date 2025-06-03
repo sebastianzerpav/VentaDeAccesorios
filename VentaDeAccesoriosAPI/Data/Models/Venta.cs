@@ -15,7 +15,7 @@ public partial class Venta
     public int? IdSede { get; set; }
 
     public DateOnly? FechaVenta { get; set; }
-
+    [JsonIgnore]
     public decimal? TotalVenta { get; set; }
 
     public string? TipoVenta { get; set; }

@@ -55,17 +55,20 @@ namespace VentaDeAccesoriosAPI.Services
         {
             try
             {
-                Role? foundRole = await context.Roles.FindAsync(idRol);
-                if (foundRole == null)
-                {
+                var foundRol = await context.Roles.FindAsync(idRol);
+                if (foundRol == null)
                     return false;
-                }
-                else
+
+                var entry = context.Entry(foundRol);
+                foreach (var collection in entry.Collections)
                 {
-                    context.Roles.Remove(foundRole);
-                    await context.SaveChangesAsync();
-                    return true;
+                    await collection.LoadAsync();
+                    (collection.CurrentValue as System.Collections.IList)?.Clear();
                 }
+
+                context.Roles.Remove(foundRol);
+                await context.SaveChangesAsync();
+                return true;
             }
             catch (Exception ex)
             {

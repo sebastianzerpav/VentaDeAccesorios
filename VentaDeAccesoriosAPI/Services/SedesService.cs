@@ -60,14 +60,20 @@ namespace VentaDeAccesoriosAPI.Services
         {
             try
             {
-                Sede? foundsede = await context.Sedes.FindAsync(id_sede);
-                if (foundsede == null) { return false; }
-                else
+                var foundSede = await context.Sedes.FindAsync(id_sede);
+                if (foundSede == null)
+                    return false;
+
+                var entry = context.Entry(foundSede);
+                foreach (var collection in entry.Collections)
                 {
-                    context.Sedes.Remove(foundsede);
-                    await context.SaveChangesAsync();
-                    return true;
+                    await collection.LoadAsync();
+                    (collection.CurrentValue as System.Collections.IList)?.Clear();
                 }
+
+                context.Sedes.Remove(foundSede);
+                await context.SaveChangesAsync();
+                return true;
             }
             catch (Exception ex)
             {

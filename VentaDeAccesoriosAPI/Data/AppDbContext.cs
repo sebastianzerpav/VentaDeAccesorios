@@ -30,7 +30,7 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<FacturasCompra> FacturasCompras { get; set; }
 
-    public virtual DbSet<Garantia> Garantias { get; set; }
+    public virtual DbSet<Garantia> Garantia { get; set; }
 
     public virtual DbSet<HistorialStock> HistorialStocks { get; set; }
 

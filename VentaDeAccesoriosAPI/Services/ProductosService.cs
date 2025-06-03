@@ -65,6 +65,13 @@ namespace VentaDeAccesoriosAPI.Services
                 if (foundProducto == null)
                     return false;
 
+                var entry = _context.Entry(foundProducto);
+                foreach (var collection in entry.Collections)
+                {
+                    await collection.LoadAsync();
+                    (collection.CurrentValue as System.Collections.IList)?.Clear();
+                }
+
                 _context.Productos.Remove(foundProducto);
                 await _context.SaveChangesAsync();
                 return true;

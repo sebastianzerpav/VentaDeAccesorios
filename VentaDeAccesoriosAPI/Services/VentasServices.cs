@@ -83,11 +83,15 @@ namespace VentaDeAccesoriosAPI.Services
         {
             try
             {
-                Venta? foundVenta = await context.Ventas.FindAsync(id_venta);
+                var foundVenta = await context.Ventas.FindAsync(id_venta);
                 if (foundVenta == null)
-                {
-                    Console.WriteLine($"Venta con ID {id_venta} no existe.");
                     return false;
+
+                var entry = context.Entry(foundVenta);
+                foreach (var collection in entry.Collections)
+                {
+                    await collection.LoadAsync();
+                    (collection.CurrentValue as System.Collections.IList)?.Clear();
                 }
 
                 context.Ventas.Remove(foundVenta);
