@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections;
+using Microsoft.EntityFrameworkCore;
 using VentaDeAccesoriosAPI.Data;
 using VentaDeAccesoriosAPI.Data.Models;
 
@@ -64,6 +65,13 @@ namespace VentaDeAccesoriosAPI.Services
                 var foundProducto = await _context.Productos.FindAsync(id_producto);
                 if (foundProducto == null)
                     return false;
+
+                var entry = _context.Entry(foundProducto);
+                foreach (var collection in entry.Collections)
+                {
+                    await collection.LoadAsync();
+                    (collection.CurrentValue as System.Collections.IList)?.Clear();
+                }
 
                 _context.Productos.Remove(foundProducto);
                 await _context.SaveChangesAsync();
