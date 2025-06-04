@@ -64,7 +64,7 @@
                 {
                     // Guarda el token en localStorage
                     await JS.InvokeVoidAsync("localStorage.setItem", "authToken", authResponse.Token);
-                    Navigation.NavigateTo("/usuarios");
+                    Navigation.NavigateTo("/Home");
                 }
                 else
                 {
