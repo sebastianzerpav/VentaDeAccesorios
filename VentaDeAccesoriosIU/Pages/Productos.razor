@@ -2,17 +2,17 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 
-@* Página de administración de productos con CRUD y paginación,
-   consumiendo las rutas de ProductosController *@
+@* Paagina de administración de productos con CRUD ,
+   consumiendo las rutas de el controlador de producto *@
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Panel Administrativo - Gestión Productos</title>
+    
     <style>
-        /* Reset y configuración base */
+        
         * {
             margin: 0;
             padding: 0;
@@ -26,7 +26,7 @@
             color: #333;
         }
 
-        /* Header y navegación */
+        
         .header {
             background-color: #2c3e50;
             color: white;
@@ -70,7 +70,7 @@
                     background-color: #34495e;
                 }
 
-        /* Container principal */
+        
         .main-container {
             max-width: 1200px;
             margin: 2rem auto;
@@ -79,7 +79,7 @@
             gap: 2rem;
         }
 
-        /* Tarjetas de sección */
+        
         .section-card {
             background: white;
             border-radius: 8px;
@@ -99,7 +99,7 @@
             padding: 1.5rem;
         }
 
-        /* Formularios */
+        
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -140,7 +140,7 @@
                 min-height: 80px;
             }
 
-        /* Botones */
+       
         .button-group {
             display: flex;
             gap: 1rem;
@@ -241,7 +241,7 @@
             background-color: #f1f1f1;
         }
 
-        /* Paginación */
+        
         .pagination {
             display: flex;
             justify-content: center;
@@ -268,7 +268,7 @@
                     background-color: #2980b9;
                 }
 
-        /* Alertas */
+        
         .alert {
             padding: 1rem;
             border-radius: 4px;
@@ -284,22 +284,10 @@
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="nav-container">
-            <div class="logo">AdminPanel</div>
-            <nav>
-                <ul class="nav-menu">
-                    <li><a href="#" class="active">Productos</a></li>
-                    <li><a href="#">Categorías</a></li>
-                    <li><a href="#">Usuarios</a></li>
-                    <li><a href="#">Salir</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+
 
     <main class="main-container">
-        <!-- Sección de formulario CRUD -->
+        
         <section class="section-card">
             <div class="section-header">Gestión de Productos</div>
             <div class="section-content">
@@ -352,7 +340,7 @@
             </div>
         </section>
 
-        <!-- Sección de listado con paginación -->
+        
         <section class="section-card">
             <div class="section-header">Lista de Productos</div>
             <div class="section-content">
@@ -412,7 +400,7 @@
 </html>
 
 @code {
-    // Parámetros de paginación
+    
     private int paginaActual = 1;
     private int tamanoPagina = 5;
     private int totalPaginas => (int)Math.Ceiling((double)listaProductos.Count / tamanoPagina);
@@ -420,10 +408,9 @@
         .Skip((paginaActual - 1) * tamanoPagina)
         .Take(tamanoPagina);
 
-    // URL base de la API (ajusta según tu dominio)
     private string baseUrl = "http://tiendadeaccesorios.runasp.net/api/Productos";
 
-    // Listado completo y registro actual
+    
     private List<Producto> listaProductos = new();
     private Producto producto = new Producto();
     private string mensaje = string.Empty;
@@ -435,7 +422,7 @@
 
     private void HandleValidSubmit()
     {
-        // Se mantiene vacío porque cada botón dispara su propio método
+        
     }
 
     private async Task Insertar()
@@ -450,7 +437,7 @@
 
         try
         {
-            // POST api/Productos
+            
             var response = await Http.PostAsJsonAsync(baseUrl, producto);
             if (response.IsSuccessStatusCode)
             {
@@ -513,7 +500,7 @@
 
     private async Task Buscar()
     {
-        // Si se ingresa ID, GET api/Productos/{id}
+        
         if (producto.IdProducto > 0)
         {
             try
@@ -541,7 +528,7 @@
                 mensaje = $"Error de consulta por ID: {ex.Message}";
             }
         }
-        // Si no hay ID y hay nombre, GET api/Productos/search?nombre={nombre}
+      
         else if (!string.IsNullOrWhiteSpace(producto.Nombre))
         {
             try
@@ -574,7 +561,7 @@
     {
         try
         {
-            // GET api/Productos
+            
             var productos = await Http.GetFromJsonAsync<List<Producto>>(baseUrl) ?? new List<Producto>();
             if (productos.Any())
             {
@@ -610,7 +597,7 @@
         mensaje = $"Producto '{p.Nombre}' (ID {p.IdProducto}) seleccionado.";
     }
 
-    // Método para eliminar desde el formulario (usando el ID del formulario)
+    
     private async Task EliminarProductoFormulario()
     {
         if (producto.IdProducto <= 0)
@@ -622,13 +609,13 @@
         await EliminarProducto(producto.IdProducto);
     }
 
-    // Método para eliminar desde la tabla (pasando el ID directamente)
+   
     private async Task EliminarProductoDeTabla(int id)
     {
         await EliminarProducto(id);
     }
 
-    // Método privado común para eliminar producto
+   
     private async Task EliminarProducto(int id)
     {
         if (id <= 0)
@@ -639,7 +626,7 @@
 
         try
         {
-            // DELETE api/Productos/{id}
+            
             var response = await Http.DeleteAsync($"{baseUrl}/{id}");
             if (response.IsSuccessStatusCode)
             {
@@ -681,7 +668,7 @@
             paginaActual--;
     }
 
-    // Definición del modelo "Producto" (coincide con VentaDeAccesoriosAPI.Data.Models.Producto)
+    // Definición del modelo "Producto" (Con VentaDeAccesoriosAPI.Data.Models.Producto)
     public class Producto
     {
         public int IdProducto { get; set; }
