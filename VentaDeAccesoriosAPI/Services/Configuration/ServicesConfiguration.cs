@@ -26,6 +26,7 @@ namespace VentaDeAccesoriosAPI.Services.Configuration
             services.AddScoped<IImagenProductoService, ImagenProductoService>();
             services.AddScoped<IProductosProveedoresService, ProductosProveedoresService>();
             services.AddScoped<IPedidoProveedorService, PedidoProveedorService>();
+            services.AddScoped<IDetallePedidoService, DetallePedidoService>();
 
 
         }
