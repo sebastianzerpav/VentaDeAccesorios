@@ -1,146 +1,119 @@
 ﻿@page "/productos"
-@layout UsuariosLayout
+@inject IProductoService ProductoService
+@inject ICategoriaService CategoriaService
+@inject NavigationManager NavigationManager
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
 
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12" id="dvMenu">
-                @* Aquí puedes insertar el menú si es dinámico *@
-            </div>
+<h3>Gestión de Productos</h3>
 
-            <div class="col-md-12">
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">Productos</h3>
-                    </div>
+<EditForm Model="@producto" OnValidSubmit="GuardarProducto">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
-                    <EditForm Model="@producto" OnValidSubmit="HandleValidSubmit">
-                        <div class="card-body">
-                            <div class="card card-gray-dark">
-                                <div class="card-header">
-                                    <h3 class="card-title">Datos de Producto</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-1">
-                                            <div class="form-group">
-                                                <label for="dato1">ID</label>
-                                                <InputText id="dato1" class="form-control" @bind-Value="producto.Dato1" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="dato2">Nombre</label>
-                                                <InputText id="dato2" class="form-control" @bind-Value="producto.Dato2" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <div class="form-group">
-                                                <label for="dato3">Stock</label>
-                                                <InputText id="dato3" class="form-control" @bind-Value="producto.Dato3" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="dato4">Precio de compra</label>
-                                                <InputText id="dato4" class="form-control" @bind-Value="producto.Dato4" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="dato5">Precio de venta</label>
-                                                <InputText id="dato5" class="form-control" @bind-Value="producto.Dato5" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mt-2">
-                                        <div class="col-md-9">
-                                            <div class="form-group">
-                                                <label for="dato6">Descripción</label>
-                                                <InputText id="dato6" class="form-control" @bind-Value="producto.Dato6" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="dato7">Garantía (Meses)</label>
-                                                <InputText id="dato7" class="form-control" @bind-Value="producto.Dato7" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card card-danger mt-3">
-                                <div class="card-header">
-                                    <h3 class="card-title">PROCESO</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Insertar">INSERTAR</button>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Actualizar">ACTUALIZAR</button>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Eliminar">ELIMINAR</button>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Consultar">CONSULTAR</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </EditForm>
-
-                    <div class="card-footer">
-                        <div id="dvMensaje">@mensaje</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <InputText @bind-Value="producto.Nombre" class="form-control" />
+        <ValidationMessage For="@(() => producto.Nombre)" />
     </div>
-</section>
+
+    <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <InputTextArea @bind-Value="producto.Descripcion" class="form-control" />
+        <ValidationMessage For="@(() => producto.Descripcion)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Precio</label>
+        <InputNumber @bind-Value="producto.Precio" class="form-control" step="0.01" />
+        <ValidationMessage For="@(() => producto.Precio)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Stock</label>
+        <InputNumber @bind-Value="producto.Stock" class="form-control" />
+        <ValidationMessage For="@(() => producto.Stock)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Categoría</label>
+        <InputSelect @bind-Value="producto.CategoriaId" class="form-select">
+            <option value="">-- Seleccione una categoría --</option>
+            @foreach (var categoria in categorias)
+            {
+                <option value="@categoria.Id">@categoria.Nombre</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => producto.CategoriaId)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Imagen</label>
+        <InputFile OnChange="CargarImagen" />
+        @if (!string.IsNullOrEmpty(imagenPreview))
+        {
+            <img src="@imagenPreview" class="img-thumbnail mt-2" style="max-width: 200px;" />
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar Producto</button>
+</EditForm>
 
 @code {
-    private Producto producto = new();
-    private string mensaje = "";
+    private Producto producto = new Producto();
+    private List<Categoria> categorias = new();
+    private string? imagenPreview;
 
-    private void HandleValidSubmit()
+    protected override async Task OnInitializedAsync()
     {
-        mensaje = "Formulario válido.";
+        categorias = await CategoriaService.ObtenerCategoriasAsync();
     }
 
-    private void Insertar()
+    private async Task CargarImagen(InputFileChangeEventArgs e)
     {
-        mensaje = "Insertar ejecutado.";
+        var archivo = e.File;
+        var buffer = new byte[archivo.Size];
+        await archivo.OpenReadStream().ReadAsync(buffer);
+
+        producto.Imagen = buffer;
+
+        // Mostrar vista previa
+        imagenPreview = $"data:{archivo.ContentType};base64,{Convert.ToBase64String(buffer)}";
     }
 
-    private void Actualizar()
+    private async Task GuardarProducto()
     {
-        mensaje = "Actualizar ejecutado.";
-    }
-
-    private void Eliminar()
-    {
-        mensaje = "Eliminar ejecutado.";
-    }
-
-    private void Consultar()
-    {
-        mensaje = "Consultar ejecutado.";
+        await ProductoService.GuardarProductoAsync(producto);
+        NavigationManager.NavigateTo("/productos/listado");
     }
 
     public class Producto
     {
-        public string Dato1 { get; set; }  // ID
-        public string Dato2 { get; set; }  // Nombre
-        public string Dato3 { get; set; }  // Stock
-        public string Dato4 { get; set; }  // Precio compra
-        public string Dato5 { get; set; }  // Precio venta
-        public string Dato6 { get; set; }  // Descripción
-        public string Dato7 { get; set; }  // Garantía (Meses)
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La descripción es obligatoria.")]
+        public string Descripcion { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El precio es obligatorio.")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor que 0.")]
+        public decimal Precio { get; set; }
+
+        [Required(ErrorMessage = "El stock es obligatorio.")]
+        [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo.")]
+        public int Stock { get; set; }
+
+        [Required(ErrorMessage = "Debe seleccionar una categoría.")]
+        public int? CategoriaId { get; set; }
+
+        public byte[]? Imagen { get; set; }
+    }
+
+    public class Categoria
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; } = string.Empty;
     }
 }
