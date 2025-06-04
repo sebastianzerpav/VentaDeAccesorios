@@ -248,11 +248,11 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.Garantia)
                 .HasForeignKey(d => d.IdProducto)
-                .HasConstraintName("FK__Garantias__id_pr__656C112C");
+                .HasConstraintName("FK__Garantia__id_pr__656C112C");
 
             entity.HasOne(d => d.IdVentaNavigation).WithMany(p => p.Garantia)
                 .HasForeignKey(d => d.IdVenta)
-                .HasConstraintName("FK__Garantias__id_ve__6477ECF3");
+                .HasConstraintName("FK__Garantia__id_ve__6477ECF3");
         });
 
         modelBuilder.Entity<HistorialStock>(entity =>

@@ -1,12 +1,11 @@
 ﻿@page "/usuarios"
-@layout UsuariosLayout
+@layout MainLayout
+@inject HttpClient Http
+@using System.ComponentModel.DataAnnotations
 
 <section class="content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-12" id="dvMenu">
-                @* Aquí puedes insertar el menú si es dinámico *@
-            </div>
 
             <div class="col-md-12">
                 <div class="card card-primary">
@@ -24,41 +23,36 @@
                                     <div class="row">
                                         <div class="col-md-1">
                                             <div class="form-group">
-                                                <label for="dato1">ID</label>
-                                                <InputText id="dato1" class="form-control" @bind-Value="usuario.Dato1" />
+                                                <label for="txtID">ID</label>
+                                                <InputNumber id="txtID" class="form-control" @bind-Value="usuario.IdUsuario" min="0" required />
                                             </div>
                                         </div>
+
                                         <div class="col-md-3">
                                             <div class="form-group">
-                                                <label for="dato2">Nombre</label>
-                                                <InputText id="dato2" class="form-control" @bind-Value="usuario.Dato2" />
+                                                <label for="txtNombre">Nombre <span class="text-danger">*</span></label>
+                                                <InputText id="txtNombre" class="form-control" @bind-Value="usuario.Nombre" required />
                                             </div>
                                         </div>
+
                                         <div class="col-md-3">
                                             <div class="form-group">
-                                                <label for="dato3">Apellido</label>
-                                                <InputText id="dato3" class="form-control" @bind-Value="usuario.Dato3" />
+                                                <label for="txtApellido">Apellido <span class="text-danger">*</span></label>
+                                                <InputText id="txtApellido" class="form-control" @bind-Value="usuario.Apellido" required />
                                             </div>
                                         </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="txtCorreo">Correo <span class="text-danger">*</span></label>
+                                                <InputText id="txtCorreo" class="form-control" @bind-Value="usuario.CorreoElectronico" type="email" required />
+                                            </div>
+                                        </div>
+
                                         <div class="col-md-2">
                                             <div class="form-group">
-                                                <label for="dato4">Correo</label>
-                                                <InputText id="dato4" class="form-control" @bind-Value="usuario.Dato4" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <div class="form-group">
-                                                <label for="dato5">Contraseña</label>
-                                                <InputText id="dato5" class="form-control" @bind-Value="usuario.Dato5" type="password" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <div class="form-group">
-                                                <label for="cboEstado">Estado</label>
-                                                <select id="cboEstado" class="form-control" @bind="usuario.Estado">
-                                                    <option value="1">Activo</option>
-                                                    <option value="2">Inactivo</option>
-                                                </select>
+                                                <label for="txtContraseña">Contraseña <span class="text-danger">*</span></label>
+                                                <InputText id="txtContraseña" class="form-control" @bind-Value="usuario.ContrasenaHash" type="password" required />
                                             </div>
                                         </div>
                                     </div>
@@ -72,17 +66,61 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-3">
-                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Insertar">INSERTAR</button>
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Insert">INSERTAR</button>
                                         </div>
                                         <div class="col-md-3">
-                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Actualizar">ACTUALIZAR</button>
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Update">ACTUALIZAR</button>
                                         </div>
                                         <div class="col-md-3">
-                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Eliminar">ELIMINAR</button>
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Buscar">CONSULTAR</button>
                                         </div>
                                         <div class="col-md-3">
-                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Consultar">CONSULTAR</button>
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="LimpiarFormulario">LIMPIAR</button>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <table id="tblEmpleados" class="table table-bordered table-striped" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Nombre</th>
+                                                <th>Apellido</th>
+                                                <th>Correo</th>
+                                                <th>Contraseña</th>
+                                                <th>Estado</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var u in usuariosPaginados)
+                                            {
+                                                <tr>
+                                                    <td>@u.IdUsuario</td>
+                                                    <td>@u.Nombre</td>
+                                                    <td>@u.Apellido</td>
+                                                    <td>@u.CorreoElectronico</td>
+                                                    <td>@u.ContrasenaHash</td>
+                                                    <td>@(u.Estado ? "Activo" : "Inactivo")</td>
+                                                    <td class="text-center" style="white-space: nowrap; width: 1%;">
+                                                        <div class="d-flex flex-row justify-content-center gap-1">
+                                                            <button class="btn btn-info btn-sm p-1" @onclick="() => SeleccionarUsuario(u)">Seleccionar</button>
+                                                            <button class="btn btn-warning btn-sm p-1" @onclick="() => CambiarEstado(u)">Cambiar Estado</button>
+                                                            <button class="btn btn-danger btn-sm p-1" @onclick="() => EliminarUsuario(u.IdUsuario)">Eliminar</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <button class="btn btn-secondary" @onclick="PaginaAnterior" disabled="@(!PuedeRetroceder)">Anterior</button>
+
+                                        <span>Página @paginaActual de @totalPaginas</span>
+
+                                        <button class="btn btn-secondary" @onclick="PaginaSiguiente" disabled="@(!PuedeAvanzar)">Siguiente</button>
                                     </div>
                                 </div>
                             </div>
@@ -99,6 +137,17 @@
 </section>
 
 @code {
+    private int paginaActual = 1;
+    private int tamanoPagina = 5;
+    private int totalPaginas => (int)Math.Ceiling((double)listaUsuarios.Count / tamanoPagina);
+
+    private IEnumerable<Usuario> usuariosPaginados => listaUsuarios
+        .Skip((paginaActual - 1) * tamanoPagina)
+        .Take(tamanoPagina);
+
+
+    private string baseUrl = "https://localhost:7248/api/Usuario";
+    private List<Usuario> listaUsuarios = new();
     private Usuario usuario = new();
     private string mensaje = "";
 
@@ -107,33 +156,250 @@
         mensaje = "Formulario válido.";
     }
 
-    private void Insertar()
+    private async Task Insert()
     {
-        mensaje = "Insertar ejecutado.";
+
+        if (string.IsNullOrWhiteSpace(usuario.Nombre) ||
+        string.IsNullOrWhiteSpace(usuario.Apellido) ||
+        string.IsNullOrWhiteSpace(usuario.CorreoElectronico) ||
+        string.IsNullOrWhiteSpace(usuario.ContrasenaHash))
+    {
+        mensaje = "Todos los campos son obligatorios.";
+        return;
     }
 
-    private void Actualizar()
+    // Validar que el correo sea válido
+    if (!usuario.CorreoElectronico.Contains("@") || !usuario.CorreoElectronico.Contains("."))
     {
-        mensaje = "Actualizar ejecutado.";
+        mensaje = "El correo ingresado no es válido.";
+        return;
+    }
+        try
+        {    
+            var nuevoUsuario = new
+            {
+                usuario.Nombre,
+                usuario.Apellido,
+                usuario.CorreoElectronico,
+                usuario.ContrasenaHash,
+                usuario.Estado
+            };
+
+
+            string Url = $"{baseUrl}/Insert";
+            var response = await Http.PostAsJsonAsync(Url, nuevoUsuario);
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = "Usuario insertado exitosamente.";
+                usuario = new Usuario();
+                paginaActual = 1;
+                await ConsultarTodos();
+            }
+            else
+            {
+                mensaje = $"Error al insertar usuario: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al insertar: {ex.Message}";
+        }
     }
 
-    private void Eliminar()
+    private async Task Update()
     {
-        mensaje = "Eliminar ejecutado.";
+        try
+        {
+            string Url = $"{baseUrl}/Update";
+            var response = await Http.PutAsJsonAsync($"{Url}/{usuario.IdUsuario}", usuario);
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = "Usuario actualizado exitosamente.";
+                usuario = new Usuario();
+                await ConsultarTodos();
+            }
+            else
+            {
+                mensaje = $"Error al actualizar usuario: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al actualizar: {ex.Message}";
+        }
     }
 
-    private void Consultar()
+    private async Task Buscar()
     {
-        mensaje = "Consultar ejecutado.";
+        if (usuario.IdUsuario > 0)
+        {
+            // Buscar por ID
+            try
+            {
+                string Url = $"{baseUrl}/GetById";
+                var result = await Http.GetFromJsonAsync<Usuario>($"{Url}/{usuario.IdUsuario}");
+                paginaActual = 1;
+                if (result != null)
+                {
+                    usuario = result;
+                    mensaje = "Usuario encontrado por ID.";
+                }
+                else
+                {
+                    mensaje = "Usuario no encontrado.";
+                }
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error de consulta por ID: {ex.Message}";
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(usuario.Nombre))
+        {
+            // Buscar por nombre
+            try
+            {
+                string Url = $"{baseUrl}/GetByName";
+                var usuarios = await Http.GetFromJsonAsync<List<Usuario>>($"{Url}/{usuario.Nombre}");
+                paginaActual = 1;
+                if (usuarios != null && usuarios.Any())
+                {
+                    listaUsuarios = usuarios;
+                    mensaje = "Resultados encontrados por nombre.";
+                }
+                else
+                {
+                    listaUsuarios = new();
+                    mensaje = "No se encontraron usuarios con ese nombre.";
+                }
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error de consulta por nombre: {ex.Message}";
+            }
+        }
+        else
+        {
+            mensaje = "Por favor, ingresa un ID o un Nombre para buscar.";
+        }
     }
+
+    private async Task ConsultarTodos()
+    {
+        try
+        {
+            string Url = $"{baseUrl}/GetAll";
+            var usuarios = await Http.GetFromJsonAsync<List<Usuario>>(Url) ?? new();
+
+            listaUsuarios = usuarios.OrderByDescending(u => u.IdUsuario).ToList();
+            mensaje = "Consulta de usuarios exitosa.";
+
+            paginaActual = 1;
+        }
+        catch
+        {
+            listaUsuarios = new();
+        }
+    }
+    private async Task SeleccionarUsuario(Usuario u)
+    {
+        usuario = new Usuario
+            {
+                IdUsuario = u.IdUsuario,
+                Nombre = u.Nombre,
+                Apellido = u.Apellido,
+                CorreoElectronico = u.CorreoElectronico,
+                ContrasenaHash = u.ContrasenaHash,
+                Estado = u.Estado
+            };
+
+        mensaje = $"Usuario {u.Nombre} seleccionado.";
+
+        await ConsultarTodos();
+    }
+
+    private async Task CambiarEstado(Usuario u)
+    {
+        try
+        {
+            u.Estado = !u.Estado;
+
+            string url = $"{baseUrl}/Update";
+            var response = await Http.PutAsJsonAsync($"{url}/{u.IdUsuario}", u);
+
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = $"Estado de {u.Nombre} actualizado a {(u.Estado ? "Activo" : "Inactivo")}.";
+                await ConsultarTodos();
+            }
+            else
+            {
+                mensaje = $"Error al actualizar estado: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al cambiar estado: {ex.Message}";
+        }
+    }
+
+    private async Task EliminarUsuario(int id)
+    {
+        try
+        {
+            string Url = $"{baseUrl}/Delete";
+            var response = await Http.DeleteAsync($"{Url}/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = $"Usuario con ID {id} eliminado correctamente.";
+                await ConsultarTodos();
+
+            }
+            else
+            {
+                mensaje = $"Error al eliminar usuario: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al eliminar: {ex.Message}";
+        }
+    }
+
+    private async Task LimpiarFormulario()
+    {
+        usuario = new Usuario();          
+        mensaje = "Formulario limpio.";  
+        await ConsultarTodos();           
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConsultarTodos();
+    }
+
+    private void PaginaSiguiente()
+    {
+        if (paginaActual < totalPaginas)
+            paginaActual++;
+    }
+
+    private void PaginaAnterior()
+    {
+        if (paginaActual > 1)
+            paginaActual--;
+    }
+
+    private bool PuedeAvanzar => paginaActual < totalPaginas;
+    private bool PuedeRetroceder => paginaActual > 1;
 
     public class Usuario
     {
-        public string Dato1 { get; set; } // ID
-        public string Dato2 { get; set; } // Nombre
-        public string Dato3 { get; set; } // Apellido
-        public string Dato4 { get; set; } // Correo
-        public string Dato5 { get; set; } // Contraseña
-        public int Estado { get; set; } = 1; // Activo por defecto
+        public int IdUsuario { get; set; } // ID
+        public string Nombre { get; set; } // Nombre
+        public string Apellido { get; set; } // Apellido
+        public string CorreoElectronico { get; set; } // Correo
+        public string ContrasenaHash { get; set; } // Contraseña
+        public bool Estado { get; set; } = true; // Activo por defecto
     }
 }
