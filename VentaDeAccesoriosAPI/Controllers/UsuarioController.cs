@@ -62,6 +62,16 @@ namespace VentaDeAccesoriosAPI.Controllers
                 return NotFound("Usuario no encontrado.");
         }
 
+        [HttpGet("GetByName/{nombre}")]
+        public async Task<IActionResult> GetByName([FromRoute] string nombre)
+        {
+            var usuarios = await usuarioService.GetByName(nombre);
+            if (usuarios.Any())
+                return Ok(usuarios);
+            else
+                return NotFound("No se encontraron usuarios.");
+        }
+
 
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()

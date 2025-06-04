@@ -65,14 +65,17 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Insert">INSERTAR</button>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Update">ACTUALIZAR</button>
                                         </div>
-                                        <div class="col-md-4">
-                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="GetById">CONSULTAR</button>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Buscar">CONSULTAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="LimpiarFormulario">LIMPIAR</button>
                                         </div>
                                     </div>
                                 </div>
@@ -92,14 +95,14 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach (var u in listaUsuarios)
+                                            @foreach (var u in usuariosPaginados)
                                             {
                                                 <tr>
                                                     <td>@u.IdUsuario</td>
                                                     <td>@u.Nombre</td>
                                                     <td>@u.Apellido</td>
                                                     <td>@u.CorreoElectronico</td>
-                                                    <td>************</td>
+                                                    <td>@u.ContrasenaHash</td>
                                                     <td>@(u.Estado ? "Activo" : "Inactivo")</td>
                                                     <td class="text-center" style="white-space: nowrap; width: 1%;">
                                                         <div class="d-flex flex-row justify-content-center gap-1">
@@ -112,6 +115,13 @@
                                             }
                                         </tbody>
                                     </table>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <button class="btn btn-secondary" @onclick="PaginaAnterior" disabled="@(!PuedeRetroceder)">Anterior</button>
+
+                                        <span>Página @paginaActual de @totalPaginas</span>
+
+                                        <button class="btn btn-secondary" @onclick="PaginaSiguiente" disabled="@(!PuedeAvanzar)">Siguiente</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -127,6 +137,15 @@
 </section>
 
 @code {
+    private int paginaActual = 1;
+    private int tamanoPagina = 5;
+    private int totalPaginas => (int)Math.Ceiling((double)listaUsuarios.Count / tamanoPagina);
+
+    private IEnumerable<Usuario> usuariosPaginados => listaUsuarios
+        .Skip((paginaActual - 1) * tamanoPagina)
+        .Take(tamanoPagina);
+
+
     private string baseUrl = "https://localhost:7248/api/Usuario";
     private List<Usuario> listaUsuarios = new();
     private Usuario usuario = new();
@@ -172,6 +191,8 @@
             if (response.IsSuccessStatusCode)
             {
                 mensaje = "Usuario insertado exitosamente.";
+                usuario = new Usuario();
+                paginaActual = 1;
                 await ConsultarTodos();
             }
             else
@@ -194,6 +215,7 @@
             if (response.IsSuccessStatusCode)
             {
                 mensaje = "Usuario actualizado exitosamente.";
+                usuario = new Usuario();
                 await ConsultarTodos();
             }
             else
@@ -206,25 +228,59 @@
             mensaje = $"Excepción al actualizar: {ex.Message}";
         }
     }
-    private async Task GetById()
+
+    private async Task Buscar()
     {
-        try
+        if (usuario.IdUsuario > 0)
         {
-            string Url = $"{baseUrl}/GetById";
-            var result = await Http.GetFromJsonAsync<Usuario>($"{Url}/{usuario.IdUsuario}");
-            if (result != null)
+            // Buscar por ID
+            try
             {
-                usuario = result;
-                mensaje = "Usuario encontrado.";
+                string Url = $"{baseUrl}/GetById";
+                var result = await Http.GetFromJsonAsync<Usuario>($"{Url}/{usuario.IdUsuario}");
+                paginaActual = 1;
+                if (result != null)
+                {
+                    usuario = result;
+                    mensaje = "Usuario encontrado por ID.";
+                }
+                else
+                {
+                    mensaje = "Usuario no encontrado.";
+                }
             }
-            else
+            catch (Exception ex)
             {
-                mensaje = "Usuario no encontrado.";
+                mensaje = $"Error de consulta por ID: {ex.Message}";
             }
         }
-        catch (Exception ex)
+        else if (!string.IsNullOrWhiteSpace(usuario.Nombre))
         {
-            mensaje = $"Error de consulta: {ex.Message}";
+            // Buscar por nombre
+            try
+            {
+                string Url = $"{baseUrl}/GetByName";
+                var usuarios = await Http.GetFromJsonAsync<List<Usuario>>($"{Url}/{usuario.Nombre}");
+                paginaActual = 1;
+                if (usuarios != null && usuarios.Any())
+                {
+                    listaUsuarios = usuarios;
+                    mensaje = "Resultados encontrados por nombre.";
+                }
+                else
+                {
+                    listaUsuarios = new();
+                    mensaje = "No se encontraron usuarios con ese nombre.";
+                }
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error de consulta por nombre: {ex.Message}";
+            }
+        }
+        else
+        {
+            mensaje = "Por favor, ingresa un ID o un Nombre para buscar.";
         }
     }
 
@@ -235,14 +291,17 @@
             string Url = $"{baseUrl}/GetAll";
             var usuarios = await Http.GetFromJsonAsync<List<Usuario>>(Url) ?? new();
 
-            listaUsuarios = usuarios.OrderByDescending(u => u.IdUsuario).ToList(); ;
+            listaUsuarios = usuarios.OrderByDescending(u => u.IdUsuario).ToList();
+            mensaje = "Consulta de usuarios exitosa.";
+
+            paginaActual = 1;
         }
         catch
         {
             listaUsuarios = new();
         }
     }
-    private void SeleccionarUsuario(Usuario u)
+    private async Task SeleccionarUsuario(Usuario u)
     {
         usuario = new Usuario
             {
@@ -253,7 +312,10 @@
                 ContrasenaHash = u.ContrasenaHash,
                 Estado = u.Estado
             };
+
         mensaje = $"Usuario {u.Nombre} seleccionado.";
+
+        await ConsultarTodos();
     }
 
     private async Task CambiarEstado(Usuario u)
@@ -291,6 +353,7 @@
             {
                 mensaje = $"Usuario con ID {id} eliminado correctamente.";
                 await ConsultarTodos();
+
             }
             else
             {
@@ -303,12 +366,32 @@
         }
     }
 
+    private async Task LimpiarFormulario()
+    {
+        usuario = new Usuario();          
+        mensaje = "Formulario limpio.";  
+        await ConsultarTodos();           
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await ConsultarTodos();
     }
 
+    private void PaginaSiguiente()
+    {
+        if (paginaActual < totalPaginas)
+            paginaActual++;
+    }
 
+    private void PaginaAnterior()
+    {
+        if (paginaActual > 1)
+            paginaActual--;
+    }
+
+    private bool PuedeAvanzar => paginaActual < totalPaginas;
+    private bool PuedeRetroceder => paginaActual > 1;
 
     public class Usuario
     {

@@ -83,6 +83,21 @@ namespace VentaDeAccesoriosAPI.Services
             }
         }
 
+        public async Task<List<Usuario>> GetByName(string nombre)
+        {
+            try
+            {
+                return await context.Usuarios
+                    .Where(u => u.Nombre.Contains(nombre)) // búsqueda parcial
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return new List<Usuario>();
+            }
+        }
+
         public async Task<List<Usuario>> GetAll()
         {
             try
@@ -105,6 +120,7 @@ namespace VentaDeAccesoriosAPI.Services
         Task<bool> Delete(int id_usuario);
         Task<List<Usuario>> GetAll();
         Task<Usuario?> GetById(int id_usuario);
+        Task<List<Usuario>> GetByName(string nombre);
 
     }
 }
