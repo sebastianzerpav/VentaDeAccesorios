@@ -50,16 +50,31 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // CORS Configuration
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy(MyAllowSpecificOrigins,
+//        builder =>
+//        {
+//            //builder.WithOrigins("https://localhost:7248", "https://localhost:7074") // Add your allowed origins here
+//            //       .AllowAnyHeader()
+//            //       .AllowAnyMethod();
+//            builder.WithOrigins("http://tiendadeaccesorios.runasp.net", "http://tiendadeaccesorios.runasp.net")
+//                  .AllowAnyHeader()
+//                  .AllowAnyMethod();
+//        });
+//});
+
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(MyAllowSpecificOrigins,
-        builder =>
-        {
-            builder.WithOrigins("https://localhost:7248", "https://localhost:7074") // Add your allowed origins here
-                   .AllowAnyHeader()
-                   .AllowAnyMethod();
-        });
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+    });
 });
+
 
 var app = builder.Build();
 
@@ -70,10 +85,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.UseHttpsRedirection();
 
 
-app.UseCors(MyAllowSpecificOrigins);
+//app.UseCors(MyAllowSpecificOrigins);
+app.UseCors();
 
 
 app.UseAuthorization();
