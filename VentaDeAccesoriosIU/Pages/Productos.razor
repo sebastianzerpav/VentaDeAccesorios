@@ -1,156 +1,687 @@
 ﻿@page "/productos"
-@layout MainLayout
+@using System.Net.Http.Json
+@inject HttpClient Http
 
-@using Microsoft.AspNetCore.Components.Forms
-@using System.IO
+@* Página de administración de productos con CRUD y paginación,
+   consumiendo las rutas de ProductosController *@
 
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">Productos</h3>
-                    </div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Administrativo - Gestión Productos</title>
+    <style>
+        /* Reset y configuración base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-                    <EditForm Model="@producto" OnValidSubmit="HandleValidSubmit">
-                        <div class="card-body">
-                            <div class="card card-gray-dark">
-                                <div class="card-header">
-                                    <h3 class="card-title">Datos del Producto</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-2">
-                                            <div class="form-group">
-                                                <label for="id">ID</label>
-                                                <InputNumber id="id" class="form-control" @bind-Value="producto.IdProducto" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="nombre">Nombre</label>
-                                                <InputText id="nombre" class="form-control" @bind-Value="producto.Nombre" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="descripcion">Descripción</label>
-                                                <InputText id="descripcion" class="form-control" @bind-Value="producto.Descripcion" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="precioCompra">Precio Compra</label>
-                                                <InputNumber id="precioCompra" class="form-control" @bind-Value="producto.PrecioCompra" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="precioVenta">Precio Venta</label>
-                                                <InputNumber id="precioVenta" class="form-control" @bind-Value="producto.PrecioVenta" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="stock">Stock</label>
-                                                <InputNumber id="stock" class="form-control" @bind-Value="producto.StockTotal" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="garantia">Garantía (meses)</label>
-                                                <InputNumber id="garantia" class="form-control" @bind-Value="producto.GarantiaMeses" />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label for="imagen">Imagen del producto</label>
-                                                <InputFile OnChange="OnInputFileChange" class="form-control" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+            color: #333;
+        }
 
-                            <div class="card card-danger mt-3">
-                                <div class="card-header">
-                                    <h3 class="card-title">PROCESO</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Insertar">INSERTAR</button>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <button type="button" class="btn btn-warning btn-block btn-lg" @onclick="Actualizar">ACTUALIZAR</button>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <button type="button" class="btn btn-danger btn-block btn-lg" @onclick="Eliminar">ELIMINAR</button>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <button type="button" class="btn btn-info btn-block btn-lg" @onclick="Consultar">CONSULTAR</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </EditForm>
+        /* Header y navegación */
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-                    <div class="card-footer">
-                        <div id="dvMensaje">@mensaje</div>
-                    </div>
-                </div>
-            </div>
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+            .nav-menu a {
+                color: white;
+                text-decoration: none;
+                padding: 0.5rem 1rem;
+                border-radius: 4px;
+                transition: background-color 0.3s ease;
+            }
+
+                .nav-menu a:hover,
+                .nav-menu a.active {
+                    background-color: #34495e;
+                }
+
+        /* Container principal */
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            gap: 2rem;
+        }
+
+        /* Tarjetas de sección */
+        .section-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background-color: #3498db;
+            color: white;
+            padding: 1rem 1.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .section-content {
+            padding: 1.5rem;
+        }
+
+        /* Formularios */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+            .form-group label {
+                margin-bottom: 0.5rem;
+                font-weight: 500;
+                color: #555;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: 0.75rem;
+                border: 2px solid #e1e8ed;
+                border-radius: 4px;
+                font-size: 1rem;
+                transition: border-color 0.3s ease;
+            }
+
+                .form-group input:focus,
+                .form-group select:focus,
+                .form-group textarea:focus {
+                    outline: none;
+                    border-color: #3498db;
+                }
+
+            .form-group textarea {
+                resize: vertical;
+                min-height: 80px;
+            }
+
+        /* Botones */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+            .btn-primary:hover {
+                background-color: #2980b9;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+            }
+
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+
+            .btn-success:hover {
+                background-color: #229954;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+            }
+
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+
+            .btn-warning:hover {
+                background-color: #e67e22;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+            }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+            .btn-danger:hover {
+                background-color: #c0392b;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+            }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+            .btn-secondary:hover {
+                background-color: #7f8c8d;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3);
+            }
+
+        /* Tabla de listado */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            border: 1px solid #e1e8ed;
+            text-align: left;
+        }
+
+        th {
+            background-color: #ecf0f1;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Paginación */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+            gap: 0.5rem;
+        }
+
+            .pagination button {
+                padding: 0.5rem 1rem;
+                border: none;
+                background-color: #3498db;
+                color: white;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+                .pagination button:disabled {
+                    background-color: #95a5a6;
+                    cursor: not-allowed;
+                }
+
+                .pagination button:hover:not(:disabled) {
+                    background-color: #2980b9;
+                }
+
+        /* Alertas */
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            border-color: #3498db;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">AdminPanel</div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="#" class="active">Productos</a></li>
+                    <li><a href="#">Categorías</a></li>
+                    <li><a href="#">Usuarios</a></li>
+                    <li><a href="#">Salir</a></li>
+                </ul>
+            </nav>
         </div>
-    </div>
-</section>
+    </header>
+
+    <main class="main-container">
+        <!-- Sección de formulario CRUD -->
+        <section class="section-card">
+            <div class="section-header">Gestión de Productos</div>
+            <div class="section-content">
+                <EditForm Model="producto" OnValidSubmit="HandleValidSubmit">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="idProducto">ID Producto (para buscar/actualizar/eliminar)</label>
+                            <InputNumber id="idProducto" @bind-Value="producto.IdProducto" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre">Nombre del producto</label>
+                            <InputText id="nombre" @bind-Value="producto.Nombre" class="form-control" placeholder="Ej: Camiseta deportiva" />
+                        </div>
+                        <div class="form-group">
+                            <label for="descripcion">Descripción</label>
+                            <InputTextArea id="descripcion" @bind-Value="producto.Descripcion" class="form-control" placeholder="Escribe una breve descripción..." />
+                        </div>
+                        <div class="form-group">
+                            <label for="precioCompra">Precio Compra</label>
+                            <InputNumber id="precioCompra" @bind-Value="producto.PrecioCompra" class="form-control" placeholder="Ej: 15000" />
+                        </div>
+                        <div class="form-group">
+                            <label for="precioVenta">Precio Venta</label>
+                            <InputNumber id="precioVenta" @bind-Value="producto.PrecioVenta" class="form-control" placeholder="Ej: 25000" />
+                        </div>
+                        <div class="form-group">
+                            <label for="stockTotal">Stock Total</label>
+                            <InputNumber id="stockTotal" @bind-Value="producto.StockTotal" class="form-control" placeholder="Ej: 100" />
+                        </div>
+                        <div class="form-group">
+                            <label for="garantiaMeses">Garantía (meses)</label>
+                            <InputNumber id="garantiaMeses" @bind-Value="producto.GarantiaMeses" class="form-control" placeholder="Ej: 12" />
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-success" @onclick="Insertar">Insertar</button>
+                        <button type="button" class="btn btn-warning" @onclick="Actualizar">Actualizar</button>
+                        <button type="button" class="btn btn-danger" @onclick="EliminarProductoFormulario">Eliminar</button>
+                        <button type="button" class="btn btn-primary" @onclick="Buscar">Buscar</button>
+                        <button type="button" class="btn btn-secondary" @onclick="ConsultarTodos">Consultar Todos</button>
+                        <button type="button" class="btn btn-secondary" @onclick="LimpiarFormulario">Limpiar</button>
+                    </div>
+                </EditForm>
+
+                @if (!string.IsNullOrEmpty(mensaje))
+                {
+                    <div class="alert alert-info mt-3">@mensaje</div>
+                }
+            </div>
+        </section>
+
+        <!-- Sección de listado con paginación -->
+        <section class="section-card">
+            <div class="section-header">Lista de Productos</div>
+            <div class="section-content">
+                @if (listaProductos == null || listaProductos.Count == 0)
+                {
+                    <div class="empty-state" style="text-align:center; padding:2rem; color:#7f8c8d;">
+                        <div class="empty-state-icon" style="font-size:3rem; margin-bottom:1rem;">📦</div>
+                        <h3>No hay productos disponibles</h3>
+                        <p>Agrega productos para verlos en la lista.</p>
+                    </div>
+                }
+                else
+                {
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Precio Compra</th>
+                                <th>Precio Venta</th>
+                                <th>Stock</th>
+                                <th>Garantía (meses)</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var prod in productosPaginados)
+                            {
+                                <tr>
+                                    <td>@prod.IdProducto</td>
+                                    <td>@prod.Nombre</td>
+                                    <td>@prod.Descripcion</td>
+                                    <td>@prod.PrecioCompra.ToString("C0")</td>
+                                    <td>@prod.PrecioVenta.ToString("C0")</td>
+                                    <td>@prod.StockTotal</td>
+                                    <td>@prod.GarantiaMeses</td>
+                                    <td>
+                                        <button class="btn btn-primary" @onclick="() => SeleccionarProducto(prod)">Seleccionar</button>
+                                        <button class="btn btn-danger" @onclick="() => EliminarProductoDeTabla(prod.IdProducto)">Eliminar</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="pagination">
+                        <button @onclick="PaginaAnterior" disabled="@(paginaActual == 1)">Anterior</button>
+                        <span style="align-self:center; margin: 0 1rem;">Página @paginaActual de @totalPaginas</span>
+                        <button @onclick="PaginaSiguiente" disabled="@(paginaActual == totalPaginas)">Siguiente</button>
+                    </div>
+                }
+            </div>
+        </section>
+    </main>
+</body>
+</html>
 
 @code {
-    private Producto producto = new();
-    private IBrowserFile? file;
-    private string mensaje = "";
+    // Parámetros de paginación
+    private int paginaActual = 1;
+    private int tamanoPagina = 5;
+    private int totalPaginas => (int)Math.Ceiling((double)listaProductos.Count / tamanoPagina);
+    private IEnumerable<Producto> productosPaginados => listaProductos
+        .Skip((paginaActual - 1) * tamanoPagina)
+        .Take(tamanoPagina);
+
+    // URL base de la API (ajusta según tu dominio)
+    private string baseUrl = "http://tiendadeaccesorios.runasp.net/api/Productos";
+
+    // Listado completo y registro actual
+    private List<Producto> listaProductos = new();
+    private Producto producto = new Producto();
+    private string mensaje = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConsultarTodos();
+    }
 
     private void HandleValidSubmit()
     {
-        mensaje = "Formulario de producto válido.";
+        // Se mantiene vacío porque cada botón dispara su propio método
     }
 
-    private void Insertar()
+    private async Task Insertar()
     {
-        mensaje = "Insertar ejecutado.";
-
-        if (file != null)
+        if (string.IsNullOrWhiteSpace(producto.Nombre) ||
+            producto.PrecioCompra <= 0 ||
+            producto.PrecioVenta <= 0)
         {
-            mensaje += " Imagen seleccionada: " + file.Name;
+            mensaje = "Nombre, precio de compra y precio de venta son obligatorios y deben ser mayores a cero.";
+            return;
+        }
+
+        try
+        {
+            // POST api/Productos
+            var response = await Http.PostAsJsonAsync(baseUrl, producto);
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = "Producto insertado correctamente.";
+                await ConsultarTodos();
+                LimpiarFormulario();
+            }
+            else
+            {
+                var texto = await response.Content.ReadAsStringAsync();
+                mensaje = $"Error al insertar producto: {response.ReasonPhrase} ({texto})";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al insertar: {ex.Message}";
         }
     }
 
-    private void Actualizar()
+    private async Task Actualizar()
     {
-        mensaje = "Actualizar ejecutado.";
-
-        if (file != null)
+        if (producto.IdProducto <= 0)
         {
-            mensaje += " Imagen seleccionada: " + file.Name;
+            mensaje = "Debe especificar un ID válido para actualizar.";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(producto.Nombre) ||
+            producto.PrecioCompra <= 0 ||
+            producto.PrecioVenta <= 0)
+        {
+            mensaje = "Nombre, precio de compra y precio de venta son obligatorios y deben ser mayores a cero.";
+            return;
+        }
+
+        try
+        {
+            // PUT api/Productos/{id}
+            var response = await Http.PutAsJsonAsync($"{baseUrl}/{producto.IdProducto}", producto);
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = "Producto actualizado correctamente.";
+                await ConsultarTodos();
+                LimpiarFormulario();
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                mensaje = "Producto no encontrado para actualizar.";
+            }
+            else
+            {
+                var texto = await response.Content.ReadAsStringAsync();
+                mensaje = $"Error al actualizar producto: {response.ReasonPhrase} ({texto})";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al actualizar: {ex.Message}";
         }
     }
 
-    private void Eliminar()
+    private async Task Buscar()
     {
-        mensaje = "Eliminar ejecutado.";
+        // Si se ingresa ID, GET api/Productos/{id}
+        if (producto.IdProducto > 0)
+        {
+            try
+            {
+                var resultado = await Http.GetFromJsonAsync<Producto>($"{baseUrl}/{producto.IdProducto}");
+                paginaActual = 1;
+                if (resultado != null)
+                {
+                    listaProductos = new List<Producto> { resultado };
+                    mensaje = "Producto encontrado por ID.";
+                }
+                else
+                {
+                    listaProductos.Clear();
+                    mensaje = "Producto no encontrado.";
+                }
+            }
+            catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                listaProductos.Clear();
+                mensaje = "Producto no encontrado.";
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error de consulta por ID: {ex.Message}";
+            }
+        }
+        // Si no hay ID y hay nombre, GET api/Productos/search?nombre={nombre}
+        else if (!string.IsNullOrWhiteSpace(producto.Nombre))
+        {
+            try
+            {
+                var resultados = await Http.GetFromJsonAsync<List<Producto>>($"{baseUrl}/search?nombre={Uri.EscapeDataString(producto.Nombre)}");
+                paginaActual = 1;
+                if (resultados != null && resultados.Any())
+                {
+                    listaProductos = resultados.OrderByDescending(p => p.IdProducto).ToList();
+                    mensaje = "Resultados encontrados por nombre.";
+                }
+                else
+                {
+                    listaProductos.Clear();
+                    mensaje = "No se encontraron productos con ese nombre.";
+                }
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error de consulta por nombre: {ex.Message}";
+            }
+        }
+        else
+        {
+            mensaje = "Por favor, ingresa un ID o un Nombre para buscar.";
+        }
     }
 
-    private void Consultar()
+    private async Task ConsultarTodos()
     {
-        mensaje = "Consultar ejecutado.";
+        try
+        {
+            // GET api/Productos
+            var productos = await Http.GetFromJsonAsync<List<Producto>>(baseUrl) ?? new List<Producto>();
+            if (productos.Any())
+            {
+                listaProductos = productos.OrderByDescending(p => p.IdProducto).ToList();
+                mensaje = $"Se encontraron {listaProductos.Count} productos.";
+            }
+            else
+            {
+                listaProductos.Clear();
+                mensaje = "No hay productos registrados.";
+            }
+            paginaActual = 1;
+        }
+        catch (Exception ex)
+        {
+            listaProductos.Clear();
+            mensaje = $"Error al consultar productos: {ex.Message}";
+        }
     }
 
-    private void OnInputFileChange(InputFileChangeEventArgs e)
+    private void SeleccionarProducto(Producto p)
     {
-        file = e.File;
+        producto = new Producto
+            {
+                IdProducto = p.IdProducto,
+                Nombre = p.Nombre,
+                Descripcion = p.Descripcion,
+                PrecioCompra = p.PrecioCompra,
+                PrecioVenta = p.PrecioVenta,
+                StockTotal = p.StockTotal,
+                GarantiaMeses = p.GarantiaMeses
+            };
+        mensaje = $"Producto '{p.Nombre}' (ID {p.IdProducto}) seleccionado.";
     }
 
+    // Método para eliminar desde el formulario (usando el ID del formulario)
+    private async Task EliminarProductoFormulario()
+    {
+        if (producto.IdProducto <= 0)
+        {
+            mensaje = "Debe especificar un ID válido para eliminar.";
+            return;
+        }
+
+        await EliminarProducto(producto.IdProducto);
+    }
+
+    // Método para eliminar desde la tabla (pasando el ID directamente)
+    private async Task EliminarProductoDeTabla(int id)
+    {
+        await EliminarProducto(id);
+    }
+
+    // Método privado común para eliminar producto
+    private async Task EliminarProducto(int id)
+    {
+        if (id <= 0)
+        {
+            mensaje = "ID inválido para eliminar.";
+            return;
+        }
+
+        try
+        {
+            // DELETE api/Productos/{id}
+            var response = await Http.DeleteAsync($"{baseUrl}/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = $"Producto con ID {id} eliminado correctamente.";
+                await ConsultarTodos();
+                LimpiarFormulario();
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                mensaje = "Producto no encontrado para eliminar.";
+            }
+            else
+            {
+                var texto = await response.Content.ReadAsStringAsync();
+                mensaje = $"Error al eliminar producto: {response.ReasonPhrase} ({texto})";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al eliminar: {ex.Message}";
+        }
+    }
+
+    private void LimpiarFormulario()
+    {
+        producto = new Producto();
+        mensaje = string.Empty;
+    }
+
+    private void PaginaSiguiente()
+    {
+        if (paginaActual < totalPaginas)
+            paginaActual++;
+    }
+
+    private void PaginaAnterior()
+    {
+        if (paginaActual > 1)
+            paginaActual--;
+    }
+
+    // Definición del modelo "Producto" (coincide con VentaDeAccesoriosAPI.Data.Models.Producto)
     public class Producto
     {
         public int IdProducto { get; set; }
