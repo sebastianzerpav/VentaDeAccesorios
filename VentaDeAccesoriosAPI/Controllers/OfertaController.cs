@@ -9,7 +9,7 @@ namespace VentaDeAccesoriosAPI.Controllers
     //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class OfertaController : Controller
+    public class OfertaController : ControllerBase
     {
 
         private IOfertasService ofertaService;

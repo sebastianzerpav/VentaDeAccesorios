@@ -1,119 +1,164 @@
 ﻿@page "/productos"
-@inject IProductoService ProductoService
-@inject ICategoriaService CategoriaService
-@inject NavigationManager NavigationManager
-@using System.ComponentModel.DataAnnotations
+@layout MainLayout
+
 @using Microsoft.AspNetCore.Components.Forms
+@using System.IO
 
-<h3>Gestión de Productos</h3>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Productos</h3>
+                    </div>
 
-<EditForm Model="@producto" OnValidSubmit="GuardarProducto">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+                    <EditForm Model="@producto" OnValidSubmit="HandleValidSubmit">
+                        <div class="card-body">
+                            <div class="card card-gray-dark">
+                                <div class="card-header">
+                                    <h3 class="card-title">Datos del Producto</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="id">ID</label>
+                                                <InputNumber id="id" class="form-control" @bind-Value="producto.IdProducto" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="nombre">Nombre</label>
+                                                <InputText id="nombre" class="form-control" @bind-Value="producto.Nombre" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="descripcion">Descripción</label>
+                                                <InputText id="descripcion" class="form-control" @bind-Value="producto.Descripcion" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="precioCompra">Precio Compra</label>
+                                                <InputNumber id="precioCompra" class="form-control" @bind-Value="producto.PrecioCompra" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="precioVenta">Precio Venta</label>
+                                                <InputNumber id="precioVenta" class="form-control" @bind-Value="producto.PrecioVenta" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="stock">Stock</label>
+                                                <InputNumber id="stock" class="form-control" @bind-Value="producto.StockTotal" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="garantia">Garantía (meses)</label>
+                                                <InputNumber id="garantia" class="form-control" @bind-Value="producto.GarantiaMeses" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="imagen">Imagen del producto</label>
+                                                <InputFile OnChange="OnInputFileChange" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-    <div class="mb-3">
-        <label class="form-label">Nombre</label>
-        <InputText @bind-Value="producto.Nombre" class="form-control" />
-        <ValidationMessage For="@(() => producto.Nombre)" />
+                            <div class="card card-danger mt-3">
+                                <div class="card-header">
+                                    <h3 class="card-title">PROCESO</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Insertar">INSERTAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-warning btn-block btn-lg" @onclick="Actualizar">ACTUALIZAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-danger btn-block btn-lg" @onclick="Eliminar">ELIMINAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-info btn-block btn-lg" @onclick="Consultar">CONSULTAR</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+
+                    <div class="card-footer">
+                        <div id="dvMensaje">@mensaje</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Descripción</label>
-        <InputTextArea @bind-Value="producto.Descripcion" class="form-control" />
-        <ValidationMessage For="@(() => producto.Descripcion)" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Precio</label>
-        <InputNumber @bind-Value="producto.Precio" class="form-control" step="0.01" />
-        <ValidationMessage For="@(() => producto.Precio)" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Stock</label>
-        <InputNumber @bind-Value="producto.Stock" class="form-control" />
-        <ValidationMessage For="@(() => producto.Stock)" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Categoría</label>
-        <InputSelect @bind-Value="producto.CategoriaId" class="form-select">
-            <option value="">-- Seleccione una categoría --</option>
-            @foreach (var categoria in categorias)
-            {
-                <option value="@categoria.Id">@categoria.Nombre</option>
-            }
-        </InputSelect>
-        <ValidationMessage For="@(() => producto.CategoriaId)" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Imagen</label>
-        <InputFile OnChange="CargarImagen" />
-        @if (!string.IsNullOrEmpty(imagenPreview))
-        {
-            <img src="@imagenPreview" class="img-thumbnail mt-2" style="max-width: 200px;" />
-        }
-    </div>
-
-    <button type="submit" class="btn btn-primary">Guardar Producto</button>
-</EditForm>
+</section>
 
 @code {
-    private Producto producto = new Producto();
-    private List<Categoria> categorias = new();
-    private string? imagenPreview;
+    private Producto producto = new();
+    private IBrowserFile? file;
+    private string mensaje = "";
 
-    protected override async Task OnInitializedAsync()
+    private void HandleValidSubmit()
     {
-        categorias = await CategoriaService.ObtenerCategoriasAsync();
+        mensaje = "Formulario de producto válido.";
     }
 
-    private async Task CargarImagen(InputFileChangeEventArgs e)
+    private void Insertar()
     {
-        var archivo = e.File;
-        var buffer = new byte[archivo.Size];
-        await archivo.OpenReadStream().ReadAsync(buffer);
+        mensaje = "Insertar ejecutado.";
 
-        producto.Imagen = buffer;
-
-        // Mostrar vista previa
-        imagenPreview = $"data:{archivo.ContentType};base64,{Convert.ToBase64String(buffer)}";
+        if (file != null)
+        {
+            mensaje += " Imagen seleccionada: " + file.Name;
+        }
     }
 
-    private async Task GuardarProducto()
+    private void Actualizar()
     {
-        await ProductoService.GuardarProductoAsync(producto);
-        NavigationManager.NavigateTo("/productos/listado");
+        mensaje = "Actualizar ejecutado.";
+
+        if (file != null)
+        {
+            mensaje += " Imagen seleccionada: " + file.Name;
+        }
+    }
+
+    private void Eliminar()
+    {
+        mensaje = "Eliminar ejecutado.";
+    }
+
+    private void Consultar()
+    {
+        mensaje = "Consultar ejecutado.";
+    }
+
+    private void OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        file = e.File;
     }
 
     public class Producto
     {
-        public int Id { get; set; }
-
-        [Required(ErrorMessage = "El nombre es obligatorio.")]
+        public int IdProducto { get; set; }
         public string Nombre { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "La descripción es obligatoria.")]
         public string Descripcion { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "El precio es obligatorio.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor que 0.")]
-        public decimal Precio { get; set; }
-
-        [Required(ErrorMessage = "El stock es obligatorio.")]
-        [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo.")]
-        public int Stock { get; set; }
-
-        [Required(ErrorMessage = "Debe seleccionar una categoría.")]
-        public int? CategoriaId { get; set; }
-
-        public byte[]? Imagen { get; set; }
-    }
-
-    public class Categoria
-    {
-        public int Id { get; set; }
-        public string Nombre { get; set; } = string.Empty;
+        public decimal PrecioCompra { get; set; }
+        public decimal PrecioVenta { get; set; }
+        public int StockTotal { get; set; }
+        public int GarantiaMeses { get; set; }
     }
 }

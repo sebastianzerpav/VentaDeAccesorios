@@ -11,7 +11,7 @@ namespace VentaDeAccesoriosAPI.Controllers
     //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class DetalleVentaController : Controller
+    public class DetalleVentaController : ControllerBase
     {
 
         private IDetalleVentaService detalleService;

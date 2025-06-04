@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections;
+using Microsoft.EntityFrameworkCore;
 using VentaDeAccesoriosAPI.Data;
 using VentaDeAccesoriosAPI.Data.Models;
 

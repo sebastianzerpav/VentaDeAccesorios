@@ -34,7 +34,9 @@ namespace VentaDeAccesoriosAPI.Services
                     .ThenInclude(ur => ur.IdRolNavigation)
                 .FirstOrDefaultAsync(u => u.CorreoElectronico == authRequest.Correo);
 
+
             if (user == null || !VerifyPassword(authRequest.Contraseña!, user.ContrasenaHash!) && authRequest.Correo != user.CorreoElectronico)
+
             {
                 return new AuthResponse
                 {

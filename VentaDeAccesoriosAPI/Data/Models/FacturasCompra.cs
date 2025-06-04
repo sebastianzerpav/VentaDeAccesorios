@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace VentaDeAccesoriosAPI.Data.Models;
 
@@ -16,8 +17,8 @@ public partial class FacturasCompra
     public string? Moneda { get; set; }
 
     public string? MetodoPago { get; set; }
-
+    [JsonIgnore]
     public virtual PedidosProveedores? IdPedidoNavigation { get; set; }
-
+    [JsonIgnore]
     public virtual ICollection<PagosProveedores> PagosProveedores { get; set; } = new List<PagosProveedores>();
 }
