@@ -20,7 +20,7 @@ namespace VentaDeAccesoriosAPI.Controllers
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
-            IEnumerable<ProductosProveedoresNaN> relaciones = await _productoProveedoresService.GetAll();
+            IEnumerable<ProductosProveedores> relaciones = await _productoProveedoresService.GetAll();
             if (!relaciones.Any()) { return NotFound("No hay ninguna relación"); }
             else
             {
@@ -28,10 +28,33 @@ namespace VentaDeAccesoriosAPI.Controllers
             }
         }
 
+
         [HttpGet("GetById/{id_relacion}")]
         public async Task<IActionResult> GetById([FromRoute] int id_relacion)
         {
-            ProductosProveedoresNaN? relacion = await _productoProveedoresService.GetById(id_relacion);
+            ProductosProveedores? relacion = await _productoProveedoresService.GetById(id_relacion);
+            if (relacion == null) { return NotFound("No hay ninguna relación"); }
+            else
+            {
+                return Ok(relacion);
+            }
+        }
+
+        [HttpGet("GetAllProductosProveedoresNaN")]
+        public async Task<IActionResult> GetAllProductosProveedoresNaN()
+        {
+            IEnumerable<ProductosProveedoresNaN> relaciones = await _productoProveedoresService.GetAllProductosProveedoresNaN();
+            if (!relaciones.Any()) { return NotFound("No hay ninguna relación"); }
+            else
+            {
+                return Ok(relaciones);
+            }
+        }
+
+        [HttpGet("GetByIdProductosProveedoresNaN/{id_relacion}")]
+        public async Task<IActionResult> GetByIdProductosProveedoresNaN([FromRoute] int id_relacion)
+        {
+            ProductosProveedoresNaN? relacion = await _productoProveedoresService.GetByIdProductosProveedoresNaN(id_relacion);
             if (relacion == null) { return NotFound("No hay ninguna relación con ese id"); }
             else
             {

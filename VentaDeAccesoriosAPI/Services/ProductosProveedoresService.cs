@@ -68,7 +68,7 @@ namespace VentaDeAccesoriosAPI.Services
             }
         }
 
-        public async Task<List<ProductosProveedoresNaN>> GetAll()
+        public async Task<List<ProductosProveedoresNaN>> GetAllProductosProveedoresNaN()
         {
             try
             {
@@ -96,7 +96,7 @@ namespace VentaDeAccesoriosAPI.Services
             }
         }
 
-        public async Task<ProductosProveedoresNaN?> GetById(int id_relacion)
+        public async Task<ProductosProveedoresNaN?> GetByIdProductosProveedoresNaN(int id_relacion)
         {
             try
             {
@@ -118,6 +118,32 @@ namespace VentaDeAccesoriosAPI.Services
             }
         }
 
+        public async Task<ProductosProveedores?> GetById(int id_relacion)
+        {
+            try
+            {
+                return await _context.ProductosProveedores.FindAsync(id_relacion);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener la relación por ID: " + ex.ToString());
+                return null;
+            }
+        }
+
+        public async Task<List<ProductosProveedores>> GetAll()
+        {
+            try
+            {
+                return await _context.ProductosProveedores.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener todas las relaciones: " + ex.ToString());
+                return new List<ProductosProveedores>();
+            }
+        }
+
     }
 
     public interface IProductosProveedoresService
@@ -125,7 +151,10 @@ namespace VentaDeAccesoriosAPI.Services
         Task<bool> Insert(ProductosProveedores relacion);
         Task<bool> Update(int id_relacion, ProductosProveedores relacion);
         Task<bool> Delete(int id_relacion);
-        Task<List<ProductosProveedoresNaN>> GetAll();
-        Task<ProductosProveedoresNaN?> GetById(int id_relacion);
+        Task<List<ProductosProveedoresNaN>> GetAllProductosProveedoresNaN();
+        Task<ProductosProveedoresNaN?> GetByIdProductosProveedoresNaN(int id_relacion);
+        Task<ProductosProveedores?> GetById(int id_relacion);
+        Task<List<ProductosProveedores>> GetAll();
+
     }
 }
