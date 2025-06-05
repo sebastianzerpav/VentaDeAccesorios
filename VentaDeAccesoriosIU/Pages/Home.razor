@@ -1,12 +1,150 @@
 ﻿@page "/home"
-<div class="container text-center mt-5">
-    <div class="card shadow-lg border-0">
-        <div class="card-body">
-            <h1 class="display-4 text-primary mb-3">¡Bienvenido a VentaDeAccesorios!</h1>
-            <p class="lead text-secondary">
-                Tu lugar ideal para encontrar los mejores accesorios tecnológicos.
-            </p>
-            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png" alt="Accesorios" class="img-fluid my-4" style="max-width: 200px;">
+
+<style>
+    body {
+        background-color: #f8f9fa; 
+    }
+
+    .hero-section {
+        background: linear-gradient(to right, #007bff, #0056b3); 
+        color: white;
+        padding: 80px 0;
+        border-bottom-left-radius: 50% 20px;
+        border-bottom-right-radius: 50% 20px;
+        position: relative;
+        overflow: hidden; 
+    }
+
+        .hero-section::before,
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1;
+        }
+
+        .hero-section::before {
+            width: 200px;
+            height: 200px;
+            top: -50px;
+            left: -50px;
+        }
+
+        .hero-section::after {
+            width: 300px;
+            height: 300px;
+            bottom: -100px;
+            right: -100px;
+        }
+
+    .hero-content {
+        position: relative;
+        z-index: 2; 
+    }
+
+    .card-feature {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        background-color: #ffffff;
+    }
+
+        .card-feature:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+    .icon-feature {
+        font-size: 3rem;
+        color: #007bff; 
+        margin-bottom: 15px;
+    }
+
+    .btn-custom-primary {
+        background-color: #28a745;
+        border-color: #28a745;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-custom-primary:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+    .section-title {
+        color: #343a40; 
+        margin-bottom: 40px;
+        font-weight: 700;
+    }
+
+    .footer-promo {
+        background-color: #343a40; 
+        color: white;
+        padding: 40px 0;
+        margin-top: 50px;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+</style>
+
+<div class="hero-section text-center">
+    <div class="container hero-content">
+        <h1 class="display-3 fw-bold mb-3 animate__animated animate__fadeInDown">¡Bienvenido a VentaDeAccesorios!</h1>
+        <p class="lead mb-4 animate__animated animate__fadeInUp">
+            Tu destino #1 para **accesorios tecnológicos de vanguardia**. Encuentra desde la protección perfecta para tu dispositivo hasta los gadgets más innovadores.
+        </p>
+        <a href="/productos" class="btn btn-lg btn-light rounded-pill px-4 py-2 animate__animated animate__zoomIn">
+            Explorar Productos
+        </a>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <h2 class="text-center section-title animate__animated animate__fadeIn">¿Por Qué Elegirnos?</h2>
+    <div class="row text-center mt-4">
+        <div class="col-md-4 mb-4 animate__animated animate__fadeInLeft">
+            <div class="card card-feature h-100 p-4">
+                <div class="card-body d-flex flex-column align-items-center">
+                    <i class="fas fa-gem icon-feature"></i>
+                    <h5 class="card-title fw-bold">Calidad Premium</h5>
+                    <p class="card-text">Seleccionamos cuidadosamente cada producto para garantizar la máxima durabilidad y rendimiento.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4 animate__animated animate__fadeInUp">
+            <div class="card card-feature h-100 p-4">
+                <div class="card-body d-flex flex-column align-items-center">
+                    <i class="fas fa-shipping-fast icon-feature"></i>
+                    <h5 class="card-title fw-bold">Envíos Rápidos</h5>
+                    <p class="card-text">Recibe tus accesorios en tiempo récord con nuestro eficiente sistema de logística.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4 animate__animated animate__fadeInRight">
+            <div class="card card-feature h-100 p-4">
+                <div class="card-body d-flex flex-column align-items-center">
+                    <i class="fas fa-headset icon-feature"></i>
+                    <h5 class="card-title fw-bold">Soporte Excepcional</h5>
+                    <p class="card-text">Nuestro equipo está listo para ayudarte con cualquier consulta o necesidad que tengas.</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<div class="footer-promo text-center animate__animated animate__fadeInUp">
+    <div class="container">
+        <h3 class="fw-bold mb-3">¡No te quedes sin tus accesorios favoritos!</h3>
+        <p class="lead mb-4">Descubre ofertas exclusivas y las últimas novedades.</p>
+        <a href="/contacto" class="btn btn-lg btn-custom-primary rounded-pill px-4 py-2">Contáctanos</a>
+    </div>
+</div>
+
+@code {
+    
+    // <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    // <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+}

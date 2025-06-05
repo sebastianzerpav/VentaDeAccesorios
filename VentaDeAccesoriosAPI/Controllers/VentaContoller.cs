@@ -19,7 +19,7 @@ namespace VentaDeAccesoriosAPI.Controllers
 
         // GET: api/ventas
         [HttpGet]
-        [AllowAnonymous] // Permite acceso sin autenticación para pruebas
+        
         public async Task<ActionResult<IEnumerable<Venta>>> GetAll()
         {
             var ventas = await _ventasService.GetAll();
@@ -28,7 +28,7 @@ namespace VentaDeAccesoriosAPI.Controllers
 
         // GET: api/ventas/{id}
         [HttpGet("{id}")]
-        [AllowAnonymous] // Permite acceso sin autenticación para pruebas
+        //[AllowAnonymous] // Permite acceso sin autenticación para pruebas
         public async Task<ActionResult<Venta>> GetById(int id)
         {
             var venta = await _ventasService.GetById(id);
@@ -40,7 +40,7 @@ namespace VentaDeAccesoriosAPI.Controllers
         // POST: api/ventas
         [HttpPost]
         //[Authorize] // Habilita esta línea para requerir autorización en este método
-        [AllowAnonymous] // Temporal para pruebas sin autenticación
+        //[AllowAnonymous] // Temporal para pruebas sin autenticación
         public async Task<ActionResult> Insert(Venta venta)
         {
             var result = await _ventasService.Insert(venta);
