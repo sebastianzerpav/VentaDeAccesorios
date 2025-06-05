@@ -29,13 +29,9 @@ namespace VentaDeAccesoriosAPI.Services
         // LOGIN
         public async Task<AuthResponse?> GetToken(AuthRequest authRequest)
         {
-            var user = await _context.Usuarios
-                .Include(u => u.UsuariosRoles)
-                    .ThenInclude(ur => ur.IdRolNavigation)
-                .FirstOrDefaultAsync(u => u.CorreoElectronico == authRequest.Correo);
+            Usuario? user = _context.Usuarios.FirstOrDefault(u => u.CorreoElectronico == authRequest.Correo && u.ContrasenaHash == HashPassword(authRequest.Contraseña));
 
-
-            if (user == null || !VerifyPassword(authRequest.Contraseña!, user.ContrasenaHash!) && authRequest.Correo != user.CorreoElectronico)
+            if (user == null)
 
             {
                 return new AuthResponse
@@ -44,15 +40,18 @@ namespace VentaDeAccesoriosAPI.Services
                     Mensaje = "Credenciales inválidas"
                 };
             }
+            else {
+                string token = GenerateToken(user);
 
-            string token = GenerateToken(user);
+                return new AuthResponse
+                {
+                    Token = token,
+                    Resultado = true,
+                    Mensaje = "Autenticación exitosa"
+                };
+            }
 
-            return new AuthResponse
-            {
-                Token = token,
-                Resultado = true,
-                Mensaje = "Autenticación exitosa"
-            };
+     
         }
 
         // REGISTRO

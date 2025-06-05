@@ -7,6 +7,7 @@ namespace VentaDeAccesoriosAPI.Services
     public class UsuariosService : IUsuarioService
     {
         public readonly AppDbContext context;
+        private readonly IAuthService authService;
         public UsuariosService(AppDbContext context)
         {
             this.context = context;
