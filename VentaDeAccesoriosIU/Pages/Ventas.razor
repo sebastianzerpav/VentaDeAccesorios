@@ -25,7 +25,7 @@
                                         <div class="col-md-2">
                                             <div class="form-group">
                                                 <label for="txtIdVenta">ID Venta</label>
-                                                
+
                                                 @if (venta.IdVenta > 0)
                                                 {
                                                     <InputNumber id="txtIdVenta" class="form-control" @bind-Value="venta.IdVenta" readonly />
@@ -148,8 +148,9 @@
                                                     <tr>
                                                         <td>@(listaProductos.FirstOrDefault(p => p.IdProducto == item.IdProducto)?.Nombre)</td>
                                                         <td>@item.Cantidad.GetValueOrDefault(0)</td>
-                                                        <td>@item.PrecioUnitario.GetValueOrDefault(0m).ToString("C")</td>
-                                                        <td>@((item.Cantidad.GetValueOrDefault(0) * item.PrecioUnitario.GetValueOrDefault(0m)).ToString("C"))</td>
+                                                        <td>@item.PrecioUnitario.GetValueOrDefault(0m)</td>
+                                                        @{item.Subtotal = item.Cantidad * item.PrecioUnitario;}
+                                                        <td>@item.Subtotal.GetValueOrDefault(0m)</td>
                                                         <td>
                                                             <button type="button" class="btn btn-danger btn-sm" @onclick="() => EliminarDetalle(item)">Eliminar</button>
                                                         </td>
@@ -168,7 +169,7 @@
                             </div>
 
                             <div class="card card-danger mt-3">
-                                
+
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-3">
@@ -243,7 +244,7 @@
 </section>
 
 @code {
-    
+
     private int paginaActual = 1;
     private int tamanoPagina = 5;
     private int totalPaginas => (int)Math.Ceiling((double)listaVentas.Count / tamanoPagina);
@@ -251,26 +252,26 @@
         .Skip((paginaActual - 1) * tamanoPagina)
         .Take(tamanoPagina);
 
-    
+
     private string ventasBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Ventas";
     private string clientesBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Cliente";
     private string usuariosBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Usuario/GetAll";
     private string productosBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Productos";
     private string sedesBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Sede/GetAll";
-
+    private string detalleVentaBaseUrl = "http://tiendadeaccesorios.runasp.net/api/DetalleVenta";
 
     private List<Venta> listaVentas = new();
     private Venta venta = new() { FechaVenta = DateOnly.FromDateTime(DateTime.Now), DetalleVenta = new List<DetalleVenta>() };
     private DetalleVenta detalleTemporal = new(); 
     private string mensaje = "";
 
-    
+
     private List<Cliente> listaClientes = new();
     private List<Usuario> listaUsuarios = new();
     private List<Sede> listaSedes = new();
     private List<Producto> listaProductos = new();
 
-    
+
     private void HandleValidSubmit()
     {
         Insert();
@@ -280,7 +281,7 @@
 
     private async Task Insert()
     {
-        
+
         if (venta.IdCliente == null || venta.IdUsuario == null || venta.IdSede == null || string.IsNullOrWhiteSpace(venta.TipoVenta) || !venta.FechaVenta.HasValue)
         {
             mensaje = "Por favor, complete todos los campos obligatorios de la venta (Cliente, Vendedor, Sede, Fecha, Tipo de Venta).";
@@ -293,7 +294,7 @@
             return;
         }
 
-       
+
         venta.TotalVenta = 0;
 
         try
@@ -302,7 +303,22 @@
             if (response.IsSuccessStatusCode)
             {
                 mensaje = "Venta insertada exitosamente.";
-                await LimpiarFormulario(); 
+
+                Venta VentaEncontrada = await Http.GetFromJsonAsync<Venta>($"{ventasBaseUrl}/GetUltimo");
+
+                foreach (DetalleVenta detalleVenta in venta.DetalleVenta)
+                {
+                    detalleVenta.IdVenta = VentaEncontrada.IdVenta;
+
+                    var responseDetalleVenta = await Http.PostAsJsonAsync($"{detalleVentaBaseUrl}/Insert", detalleVenta);
+                    if (responseDetalleVenta.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("Detalle guardado con exito");
+                    }
+                }
+
+                await LimpiarFormulario();
+                await ConsultarTodos();
             }
             else
             {
@@ -583,12 +599,13 @@
 
     public class DetalleVenta
     {
-        public int IdDetalleVenta { get; set; } 
+        public int IdDetalle { get; set; } 
         public int IdVenta { get; set; } 
         public int? IdProducto { get; set; }
         public int? Cantidad { get; set; } 
         public decimal? PrecioUnitario { get; set; } 
-        
+        public decimal? Subtotal { get; set; } 
+
     }
 
     public class Venta
@@ -606,7 +623,7 @@
         [Required(ErrorMessage = "El tipo de venta es obligatorio.")]
         public string? TipoVenta { get; set; }
 
-        public ICollection<DetalleVenta> DetalleVenta { get; set; } = new List<DetalleVenta>();
+        public List<DetalleVenta> DetalleVenta { get; set; } = new List<DetalleVenta>();
         
     }
 }

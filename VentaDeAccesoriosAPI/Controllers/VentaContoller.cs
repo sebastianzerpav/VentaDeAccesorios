@@ -78,5 +78,12 @@ namespace VentaDeAccesoriosAPI.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("GetUltimo")]
+        public async Task<IActionResult> GetUltimo()
+        {
+            Venta venta = await _ventasService.GetUltimo();
+            return Ok(venta);
+        }
     }
 }
