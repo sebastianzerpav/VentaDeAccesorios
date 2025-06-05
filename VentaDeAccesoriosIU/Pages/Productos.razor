@@ -451,7 +451,7 @@
         try
         {
             // POST api/Productos
-            var response = await Http.PostAsJsonAsync(baseUrl, producto);
+            var response = await Http.PostAsJsonAsync($"{baseUrl}/Insert", producto);
             if (response.IsSuccessStatusCode)
             {
                 mensaje = "Producto insertado correctamente.";
@@ -488,7 +488,7 @@
         try
         {
             // PUT api/Productos/{id}
-            var response = await Http.PutAsJsonAsync($"{baseUrl}/{producto.IdProducto}", producto);
+            var response = await Http.PutAsJsonAsync($"{baseUrl}/Update/{producto.IdProducto}", producto);
             if (response.IsSuccessStatusCode)
             {
                 mensaje = "Producto actualizado correctamente.";
@@ -518,7 +518,7 @@
         {
             try
             {
-                var resultado = await Http.GetFromJsonAsync<Producto>($"{baseUrl}/{producto.IdProducto}");
+                var resultado = await Http.GetFromJsonAsync<Producto>($"{baseUrl}/GetById/{producto.IdProducto}");
                 paginaActual = 1;
                 if (resultado != null)
                 {
@@ -575,7 +575,7 @@
         try
         {
             // GET api/Productos
-            var productos = await Http.GetFromJsonAsync<List<Producto>>(baseUrl) ?? new List<Producto>();
+            var productos = await Http.GetFromJsonAsync<List<Producto>>($"{baseUrl}/GetAll") ?? new List<Producto>();
             if (productos.Any())
             {
                 listaProductos = productos.OrderByDescending(p => p.IdProducto).ToList();
@@ -640,7 +640,7 @@
         try
         {
             // DELETE api/Productos/{id}
-            var response = await Http.DeleteAsync($"{baseUrl}/{id}");
+            var response = await Http.DeleteAsync($"{baseUrl}/Delete/{id}");
             if (response.IsSuccessStatusCode)
             {
                 mensaje = $"Producto con ID {id} eliminado correctamente.";
