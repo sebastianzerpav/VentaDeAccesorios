@@ -168,9 +168,7 @@
                             </div>
 
                             <div class="card card-danger mt-3">
-                                <div class="card-header">
-                                    <h3 class="card-title">PROCESO</h3>
-                                </div>
+                                
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-3">
@@ -256,11 +254,11 @@
     
     private string ventasBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Ventas";
     private string clientesBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Cliente";
-    private string usuariosBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Usuario";
+    private string usuariosBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Usuario/GetAll";
     private string productosBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Producto"; 
-    private string sedesBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Sede"; 
+    private string sedesBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Sede/GetAll";
 
-    
+
     private List<Venta> listaVentas = new();
     private Venta venta = new() { FechaVenta = DateOnly.FromDateTime(DateTime.Now), DetalleVenta = new List<DetalleVenta>() };
     private DetalleVenta detalleTemporal = new(); 
@@ -437,7 +435,7 @@
             if (response.IsSuccessStatusCode)
             {
                 mensaje = $"Venta con ID {id} eliminada correctamente.";
-                await ConsultarTodos(); // Refresh list
+                await ConsultarTodos(); 
             }
             else
             {
