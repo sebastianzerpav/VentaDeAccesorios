@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using VentaDeAccesoriosAPI.Data;
 using VentaDeAccesoriosAPI.Data.Models;
 
@@ -130,6 +131,14 @@ namespace VentaDeAccesoriosAPI.Services
                 return new List<Venta>();
             }
         }
+
+        [HttpGet("GetUltimo")]
+        public async Task<Venta> GetUltimo()
+        {
+            Venta? ultimo = await context.Ventas.OrderByDescending(v => v.IdVenta).FirstOrDefaultAsync();
+
+            return ultimo;
+        }
     }
 
     public interface IVentasService
@@ -139,5 +148,6 @@ namespace VentaDeAccesoriosAPI.Services
         Task<bool> Delete(int id_venta);
         Task<List<Venta>> GetAll();
         Task<Venta?> GetById(int id_venta);
+        Task<Venta> GetUltimo();
     }
 }

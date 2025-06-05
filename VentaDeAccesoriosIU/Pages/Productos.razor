@@ -10,9 +10,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+
     <style>
-        
+
         * {
             margin: 0;
             padding: 0;
@@ -26,7 +26,7 @@
             color: #333;
         }
 
-        
+
         .header {
             background-color: #2c3e50;
             color: white;
@@ -70,7 +70,7 @@
                     background-color: #34495e;
                 }
 
-        
+
         .main-container {
             max-width: 1200px;
             margin: 2rem auto;
@@ -79,7 +79,7 @@
             gap: 2rem;
         }
 
-        
+
         .section-card {
             background: white;
             border-radius: 8px;
@@ -99,7 +99,7 @@
             padding: 1.5rem;
         }
 
-        
+
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -140,7 +140,7 @@
                 min-height: 80px;
             }
 
-       
+
         .button-group {
             display: flex;
             gap: 1rem;
@@ -241,7 +241,7 @@
             background-color: #f1f1f1;
         }
 
-        
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -268,7 +268,7 @@
                     background-color: #2980b9;
                 }
 
-        
+
         .alert {
             padding: 1rem;
             border-radius: 4px;
@@ -287,7 +287,7 @@
 
 
     <main class="main-container">
-        
+
         <section class="section-card">
             <div class="section-header">Gestión de Productos</div>
             <div class="section-content">
@@ -298,7 +298,7 @@
                             <InputNumber id="idProducto" @bind-Value="producto.IdProducto" class="form-control" />
                         </div>
                         <div class="form-group">
-                            <label for="nombre">Nombre del producto</label>
+                            <label for="nombre">Nombre del producto<span class="text-danger">*</span></label>
                             <InputText id="nombre" @bind-Value="producto.Nombre" class="form-control" placeholder="Ej: Camiseta deportiva" />
                         </div>
                         <div class="form-group">
@@ -307,19 +307,19 @@
                         </div>
                         <div class="form-group">
                             <label for="precioCompra">Precio Compra</label>
-                            <InputNumber id="precioCompra" @bind-Value="producto.PrecioCompra" class="form-control" placeholder="Ej: 15000" />
+                            <InputNumber id="precioCompra" @bind-Value="producto.PrecioCompra" class="form-control" placeholder="Ej: 15000" min=0 />
                         </div>
                         <div class="form-group">
                             <label for="precioVenta">Precio Venta</label>
-                            <InputNumber id="precioVenta" @bind-Value="producto.PrecioVenta" class="form-control" placeholder="Ej: 25000" />
+                            <InputNumber id="precioVenta" @bind-Value="producto.PrecioVenta" class="form-control" placeholder="Ej: 25000" min=0 />
                         </div>
                         <div class="form-group">
                             <label for="stockTotal">Stock Total</label>
-                            <InputNumber id="stockTotal" @bind-Value="producto.StockTotal" class="form-control" placeholder="Ej: 100" />
+                            <InputNumber id="stockTotal" @bind-Value="producto.StockTotal" class="form-control" placeholder="Ej: 100" min=0 />
                         </div>
                         <div class="form-group">
                             <label for="garantiaMeses">Garantía (meses)</label>
-                            <InputNumber id="garantiaMeses" @bind-Value="producto.GarantiaMeses" class="form-control" placeholder="Ej: 12" />
+                            <InputNumber id="garantiaMeses" @bind-Value="producto.GarantiaMeses" class="form-control" placeholder="Ej: 12" min=0 />
                         </div>
                     </div>
 
@@ -340,7 +340,7 @@
             </div>
         </section>
 
-        
+
         <section class="section-card">
             <div class="section-header">Lista de Productos</div>
             <div class="section-content">
@@ -400,7 +400,7 @@
 </html>
 
 @code {
-    
+
     private int paginaActual = 1;
     private int tamanoPagina = 5;
     private int totalPaginas => (int)Math.Ceiling((double)listaProductos.Count / tamanoPagina);
@@ -410,7 +410,7 @@
 
     private string baseUrl = "http://tiendadeaccesorios.runasp.net/api/Productos";
 
-    
+
     private List<Producto> listaProductos = new();
     private Producto producto = new Producto();
     private string mensaje = string.Empty;
@@ -422,7 +422,7 @@
 
     private void HandleValidSubmit()
     {
-        
+
     }
 
     private async Task Insertar()
@@ -437,8 +437,8 @@
 
         try
         {
-            
-            var response = await Http.PostAsJsonAsync(baseUrl, producto);
+
+            var response = await Http.PostAsJsonAsync($"{baseUrl}/Insert", producto);
             if (response.IsSuccessStatusCode)
             {
                 mensaje = "Producto insertado correctamente.";
@@ -475,7 +475,7 @@
         try
         {
             // PUT api/Productos/{id}
-            var response = await Http.PutAsJsonAsync($"{baseUrl}/{producto.IdProducto}", producto);
+            var response = await Http.PutAsJsonAsync($"{baseUrl}/Update/{producto.IdProducto}", producto);
             if (response.IsSuccessStatusCode)
             {
                 mensaje = "Producto actualizado correctamente.";
@@ -500,12 +500,12 @@
 
     private async Task Buscar()
     {
-        
+
         if (producto.IdProducto > 0)
         {
             try
             {
-                var resultado = await Http.GetFromJsonAsync<Producto>($"{baseUrl}/{producto.IdProducto}");
+                var resultado = await Http.GetFromJsonAsync<Producto>($"{baseUrl}/GetById/{producto.IdProducto}");
                 paginaActual = 1;
                 if (resultado != null)
                 {
@@ -528,7 +528,7 @@
                 mensaje = $"Error de consulta por ID: {ex.Message}";
             }
         }
-      
+
         else if (!string.IsNullOrWhiteSpace(producto.Nombre))
         {
             try
@@ -561,8 +561,8 @@
     {
         try
         {
-            
-            var productos = await Http.GetFromJsonAsync<List<Producto>>(baseUrl) ?? new List<Producto>();
+
+            var productos = await Http.GetFromJsonAsync<List<Producto>>($"{baseUrl}/GetAll") ?? new List<Producto>();
             if (productos.Any())
             {
                 listaProductos = productos.OrderByDescending(p => p.IdProducto).ToList();
@@ -597,7 +597,7 @@
         mensaje = $"Producto '{p.Nombre}' (ID {p.IdProducto}) seleccionado.";
     }
 
-    
+
     private async Task EliminarProductoFormulario()
     {
         if (producto.IdProducto <= 0)
@@ -609,13 +609,13 @@
         await EliminarProducto(producto.IdProducto);
     }
 
-   
+
     private async Task EliminarProductoDeTabla(int id)
     {
         await EliminarProducto(id);
     }
 
-   
+
     private async Task EliminarProducto(int id)
     {
         if (id <= 0)
@@ -626,8 +626,8 @@
 
         try
         {
-            
-            var response = await Http.DeleteAsync($"{baseUrl}/{id}");
+
+            var response = await Http.DeleteAsync($"{baseUrl}/Delete/{id}");
             if (response.IsSuccessStatusCode)
             {
                 mensaje = $"Producto con ID {id} eliminado correctamente.";

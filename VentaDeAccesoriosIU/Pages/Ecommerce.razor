@@ -1,0 +1,51 @@
+﻿@page "/ecommerce"
+@using Newtonsoft.Json
+@inject HttpClient http
+@using VentaDeAccesoriosIU.Models
+
+<h3>Ecommerce</h3>
+@if (productosLista == null || productosLista.productos.Count == 0)
+{
+	<p>No hay productos</p>
+}
+else
+{
+	<div>
+		@foreach(var producto in productosLista.productos){
+			<p>@producto.Nombre</p>
+			<p>@producto.Descripcion</p>
+			<p>@producto.PrecioVenta</p>
+			<p>@producto.StockTotal</p>
+		}
+	</div>
+}
+
+
+@code {
+	public Models.Productos productosLista { get; set; }
+
+	protected override Task OnInitializedAsync()
+	{
+		GetProductos();
+		return base.OnInitializedAsync();
+	}
+
+	private async void GetProductos()
+	{
+		try
+		{
+			var response = await http.GetAsync("http://tiendadeaccesorios.runasp.net/api/Productos/GetAll");
+			if (response.IsSuccessStatusCode)
+			{
+				string responseBody = await response.Content.ReadAsStringAsync();
+
+				productosLista = JsonConvert.DeserializeObject<Models.Productos>(responseBody);
+				StateHasChanged();
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+		}
+	}
+}

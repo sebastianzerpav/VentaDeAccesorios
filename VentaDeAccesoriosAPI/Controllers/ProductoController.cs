@@ -15,14 +15,14 @@ namespace VentaDeAccesoriosAPI.Controllers
             _productoService = productoService;
         }
 
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
             var productos = await _productoService.GetAll();
             return Ok(productos);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var producto = await _productoService.GetById(id);
@@ -39,7 +39,7 @@ namespace VentaDeAccesoriosAPI.Controllers
             return Ok(productos);
         }
 
-        [HttpPost]
+        [HttpPost("Insert")]
         public async Task<IActionResult> Insert([FromBody] Producto producto)
         {
             if (!ModelState.IsValid)
@@ -55,7 +55,7 @@ namespace VentaDeAccesoriosAPI.Controllers
             return StatusCode(500, "Error interno al crear el producto");
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("Update/{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] Producto producto)
         {
             if (!ModelState.IsValid)
@@ -68,7 +68,7 @@ namespace VentaDeAccesoriosAPI.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var resultado = await _productoService.Delete(id);

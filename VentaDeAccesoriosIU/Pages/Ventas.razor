@@ -1,0 +1,629 @@
+﻿@page "/ventas"
+@layout MainLayout
+@inject HttpClient Http
+@using System.ComponentModel.DataAnnotations
+
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Gestión de Ventas</h3>
+                    </div>
+
+                    <EditForm Model="@venta" OnValidSubmit="HandleValidSubmit">
+                        <div class="card-body">
+                            <div class="card card-gray-dark">
+                                <div class="card-header">
+                                    <h3 class="card-title">Datos de la Venta</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="txtIdVenta">ID Venta</label>
+
+                                                @if (venta.IdVenta > 0)
+                                                {
+                                                    <InputNumber id="txtIdVenta" class="form-control" @bind-Value="venta.IdVenta" readonly />
+                                                }
+                                                else
+                                                {
+                                                    <input id="txtIdVenta" class="form-control" value="[Auto Asignado]" disabled />
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="ddlCliente">Cliente <span class="text-danger">*</span></label>
+                                                <InputSelect id="ddlCliente" class="form-control" @bind-Value="venta.IdCliente">
+                                                    <option value="">Seleccione un cliente</option>
+                                                    @foreach (var c in listaClientes)
+                                                    {
+                                                        <option value="@c.IdCliente">@c.Nombre @c.Apellido</option>
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="@(() => venta.IdCliente)" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="ddlUsuario">Vendedor <span class="text-danger">*</span></label>
+                                                <InputSelect id="ddlUsuario" class="form-control" @bind-Value="venta.IdUsuario">
+                                                    <option value="">Seleccione un vendedor</option>
+                                                    @foreach (var u in listaUsuarios)
+                                                    {
+                                                        <option value="@u.IdUsuario">@u.Nombre @u.Apellido</option>
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="@(() => venta.IdUsuario)" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="ddlSede">Sede <span class="text-danger">*</span></label>
+                                                <InputSelect id="ddlSede" class="form-control" @bind-Value="venta.IdSede">
+                                                    <option value="">Seleccione una sede</option>
+                                                    @foreach (var s in listaSedes)
+                                                    {
+                                                        <option value="@s.IdSede">@s.Nombre</option>
+                                                    }
+                                                </InputSelect>
+                                                <ValidationMessage For="@(() => venta.IdSede)" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="dtFechaVenta">Fecha de Venta <span class="text-danger">*</span></label>
+                                                <InputDate id="dtFechaVenta" class="form-control" @bind-Value="venta.FechaVenta" required />
+                                                <ValidationMessage For="@(() => venta.FechaVenta)" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="txtTipoVenta">Tipo de Venta <span class="text-danger">*</span></label>
+                                                <InputText id="txtTipoVenta" class="form-control" @bind-Value="venta.TipoVenta" required />
+                                                <ValidationMessage For="@(() => venta.TipoVenta)" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="txtTotalVenta">Total Venta</label>
+                                                <InputNumber id="txtTotalVenta" class="form-control" @bind-Value="venta.TotalVenta" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card card-info mt-3">
+                                <div class="card-header">
+                                    <h3 class="card-title">Detalle de la Venta</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="ddlProducto">Producto</label>
+                                                <InputSelect id="ddlProducto" class="form-control" @bind-Value="detalleTemporal.IdProducto">
+                                                    <option value="">Seleccione un producto</option>
+                                                    @foreach (var p in listaProductos)
+                                                    {
+                                                        <option value="@p.IdProducto">@p.Nombre (@p.PrecioVenta.ToString("C"))</option>
+                                                    }
+                                                </InputSelect>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="txtCantidad">Cantidad</label>
+                                                <InputNumber id="txtCantidad" class="form-control" @bind-Value="detalleTemporal.Cantidad" min="1" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 d-flex align-items-end">
+                                            <button type="button" class="btn btn-primary btn-block" @onclick="AgregarDetalle">Agregar Producto</button>
+                                        </div>
+                                    </div>
+
+                                    <table class="table table-bordered table-striped mt-3">
+                                        <thead>
+                                            <tr>
+                                                <th>Producto</th>
+                                                <th>Cantidad</th>
+                                                <th>Precio Unitario</th>
+                                                <th>Subtotal</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (venta.DetalleVenta != null && venta.DetalleVenta.Any())
+                                            {
+                                                @foreach (var item in venta.DetalleVenta)
+                                                {
+                                                    <tr>
+                                                        <td>@(listaProductos.FirstOrDefault(p => p.IdProducto == item.IdProducto)?.Nombre)</td>
+                                                        <td>@item.Cantidad.GetValueOrDefault(0)</td>
+                                                        <td>@item.PrecioUnitario.GetValueOrDefault(0m)</td>
+                                                        @{item.Subtotal = item.Cantidad * item.PrecioUnitario;}
+                                                        <td>@item.Subtotal.GetValueOrDefault(0m)</td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-danger btn-sm" @onclick="() => EliminarDetalle(item)">Eliminar</button>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="5" class="text-center">No hay productos agregados a esta venta.</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="card card-danger mt-3">
+
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <button type="submit" class="btn btn-success btn-block btn-lg">GUARDAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-warning btn-block btn-lg" @onclick="Update">ACTUALIZAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Buscar">CONSULTAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn-secondary btn-block btn-lg" @onclick="LimpiarFormulario">LIMPIAR</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <table id="tblVentas" class="table table-bordered table-striped" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>ID Venta</th>
+                                                <th>Cliente</th>
+                                                <th>Vendedor</th>
+                                                <th>Sede</th>
+                                                <th>Fecha</th>
+                                                <th>Total</th>
+                                                <th>Tipo</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var v in ventasPaginadas)
+                                            {
+                                                <tr>
+                                                    <td>@v.IdVenta</td>
+                                                    <td>@(listaClientes.FirstOrDefault(c => c.IdCliente == v.IdCliente)?.Nombre) @(listaClientes.FirstOrDefault(c => c.IdCliente == v.IdCliente)?.Apellido)</td>
+                                                    <td>@(listaUsuarios.FirstOrDefault(u => u.IdUsuario == v.IdUsuario)?.Nombre)</td>
+                                                    <td>@(listaSedes.FirstOrDefault(s => s.IdSede == v.IdSede)?.Nombre)</td>
+                                                    <td>@v.FechaVenta?.ToShortDateString()</td>
+                                                    <td>@v.TotalVenta?.ToString("C")</td>
+                                                    <td>@v.TipoVenta</td>
+                                                    <td class="text-center" style="white-space: nowrap; width: 1%;">
+                                                        <div class="d-flex flex-row justify-content-center gap-1">
+                                                            <button class="btn btn-info btn-sm p-1" @onclick="() => SeleccionarVenta(v)">Seleccionar</button>
+                                                            <button class="btn btn-danger btn-sm p-1" @onclick="() => EliminarVenta(v.IdVenta)">Eliminar</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <button class="btn btn-secondary" @onclick="PaginaAnterior" disabled="@(!PuedeRetroceder)">Anterior</button>
+                                        <span>Página @paginaActual de @totalPaginas</span>
+                                        <button class="btn btn-secondary" @onclick="PaginaSiguiente" disabled="@(!PuedeAvanzar)">Siguiente</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+
+                    <div class="card-footer">
+                        <div id="dvMensaje">@mensaje</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+
+    private int paginaActual = 1;
+    private int tamanoPagina = 5;
+    private int totalPaginas => (int)Math.Ceiling((double)listaVentas.Count / tamanoPagina);
+    private IEnumerable<Venta> ventasPaginadas => listaVentas
+        .Skip((paginaActual - 1) * tamanoPagina)
+        .Take(tamanoPagina);
+
+
+    private string ventasBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Ventas";
+    private string clientesBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Cliente";
+    private string usuariosBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Usuario/GetAll";
+    private string productosBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Productos";
+    private string sedesBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Sede/GetAll";
+    private string detalleVentaBaseUrl = "http://tiendadeaccesorios.runasp.net/api/DetalleVenta";
+
+    private List<Venta> listaVentas = new();
+    private Venta venta = new() { FechaVenta = DateOnly.FromDateTime(DateTime.Now), DetalleVenta = new List<DetalleVenta>() };
+    private DetalleVenta detalleTemporal = new(); 
+    private string mensaje = "";
+
+
+    private List<Cliente> listaClientes = new();
+    private List<Usuario> listaUsuarios = new();
+    private List<Sede> listaSedes = new();
+    private List<Producto> listaProductos = new();
+
+
+    private void HandleValidSubmit()
+    {
+        Insert();
+    }
+
+
+
+    private async Task Insert()
+    {
+
+        if (venta.IdCliente == null || venta.IdUsuario == null || venta.IdSede == null || string.IsNullOrWhiteSpace(venta.TipoVenta) || !venta.FechaVenta.HasValue)
+        {
+            mensaje = "Por favor, complete todos los campos obligatorios de la venta (Cliente, Vendedor, Sede, Fecha, Tipo de Venta).";
+            return;
+        }
+
+        if (venta.DetalleVenta == null || !venta.DetalleVenta.Any())
+        {
+            mensaje = "Debe agregar al menos un producto al detalle de la venta.";
+            return;
+        }
+
+
+        venta.TotalVenta = 0;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync($"{ventasBaseUrl}/Insert", venta);
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = "Venta insertada exitosamente.";
+
+                Venta VentaEncontrada = await Http.GetFromJsonAsync<Venta>($"{ventasBaseUrl}/GetUltimo");
+
+                foreach (DetalleVenta detalleVenta in venta.DetalleVenta)
+                {
+                    detalleVenta.IdVenta = VentaEncontrada.IdVenta;
+
+                    var responseDetalleVenta = await Http.PostAsJsonAsync($"{detalleVentaBaseUrl}/Insert", detalleVenta);
+                    if (responseDetalleVenta.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("Detalle guardado con exito");
+                    }
+                }
+
+                await LimpiarFormulario();
+                await ConsultarTodos();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                mensaje = $"Error al insertar venta: {response.ReasonPhrase} - {errorContent}";
+                Console.WriteLine($"API Error: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al insertar: {ex.Message}";
+            Console.WriteLine($"Exception: {ex.ToString()}");
+        }
+    }
+
+    private async Task Update()
+    {
+        if (venta.IdVenta <= 0)
+        {
+            mensaje = "Debe seleccionar una venta para actualizar.";
+            return;
+        }
+        if (venta.IdCliente == null || venta.IdUsuario == null || venta.IdSede == null || string.IsNullOrWhiteSpace(venta.TipoVenta) || !venta.FechaVenta.HasValue)
+        {
+            mensaje = "Por favor, complete todos los campos obligatorios de la venta.";
+            return;
+        }
+        if (venta.DetalleVenta == null || !venta.DetalleVenta.Any())
+        {
+            mensaje = "Debe agregar al menos un producto al detalle de la venta.";
+            return;
+        }
+        // TotalVenta es calculado pero aca lo mostramos e inicializamos para evitar problemas de validación
+        venta.TotalVenta = 0;
+
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"{ventasBaseUrl}/Update/{venta.IdVenta}", venta);
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = "Venta actualizada exitosamente.";
+                await LimpiarFormulario();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                mensaje = $"Error al actualizar venta: {response.ReasonPhrase} - {errorContent}";
+                Console.WriteLine($"API Error: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al actualizar: {ex.Message}";
+            Console.WriteLine($"Exception: {ex.ToString()}");
+        }
+    }
+
+    private async Task Buscar()
+    {
+        if (venta.IdVenta > 0)
+        {
+            try
+            {
+                var result = await Http.GetFromJsonAsync<Venta>($"{ventasBaseUrl}/GetById/{venta.IdVenta}");
+                paginaActual = 1;
+                if (result != null)
+                {
+                    listaVentas = new List<Venta> { result }; 
+                    venta = result; 
+                    mensaje = "Venta encontrada por ID.";
+                }
+                else
+                {
+                    listaVentas = new();
+                    mensaje = "Venta no encontrada.";
+                }
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error de consulta por ID: {ex.Message}";
+                Console.WriteLine($"Exception: {ex.ToString()}");
+            }
+        }
+        else
+        {
+            mensaje = "Por favor, ingrese un ID de Venta para buscar o presione Consultar para ver todas.";
+            await ConsultarTodos(); 
+        }
+    }
+
+    private async Task ConsultarTodos()
+    {
+        try
+        {
+            var ventas = await Http.GetFromJsonAsync<List<Venta>>($"{ventasBaseUrl}/GetAll") ?? new();
+            listaVentas = ventas.OrderByDescending(v => v.IdVenta).ToList();
+            mensaje = "Consulta de ventas exitosa.";
+            paginaActual = 1;
+        }
+        catch (Exception ex)
+        {
+            listaVentas = new();
+            mensaje = $"Error al consultar todas las ventas: {ex.Message}";
+            Console.WriteLine($"Exception: {ex.ToString()}");
+        }
+    }
+
+    private async Task SeleccionarVenta(Venta v)
+    {
+       
+        venta = new Venta
+            {
+                IdVenta = v.IdVenta,
+                IdCliente = v.IdCliente,
+                IdUsuario = v.IdUsuario,
+                IdSede = v.IdSede,
+                FechaVenta = v.FechaVenta,
+                TotalVenta = v.TotalVenta,
+                TipoVenta = v.TipoVenta,
+                DetalleVenta = v.DetalleVenta?.ToList() ?? new List<DetalleVenta>()
+            };
+        mensaje = $"Venta {v.IdVenta} seleccionada.";
+    }
+
+    private async Task EliminarVenta(int id)
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"{ventasBaseUrl}/Delete/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = $"Venta con ID {id} eliminada correctamente.";
+                await ConsultarTodos(); 
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                mensaje = $"Error al eliminar venta: {response.ReasonPhrase} - {errorContent}";
+                Console.WriteLine($"API Error: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al eliminar: {ex.Message}";
+            Console.WriteLine($"Exception: {ex.ToString()}");
+        }
+    }
+
+    private async Task LimpiarFormulario()
+    {
+        venta = new Venta { FechaVenta = DateOnly.FromDateTime(DateTime.Now), DetalleVenta = new List<DetalleVenta>() };
+        detalleTemporal = new(); 
+        mensaje = "Formulario limpio.";
+        await ConsultarTodos(); 
+    }
+
+    private void AgregarDetalle()
+    {
+        if (detalleTemporal.IdProducto == null || detalleTemporal.Cantidad <= 0)
+        {
+            mensaje = "Debe seleccionar un producto y una cantidad válida para agregar al detalle.";
+            return;
+        }
+
+        var selectedProduct = listaProductos.FirstOrDefault(p => p.IdProducto == detalleTemporal.IdProducto);
+        if (selectedProduct == null)
+        {
+            mensaje = "Producto seleccionado no encontrado en la lista.";
+            return;
+        }
+
+
+        var existingDetail = venta.DetalleVenta.FirstOrDefault(d => d.IdProducto == detalleTemporal.IdProducto);
+        if (existingDetail != null)
+        {
+            existingDetail.Cantidad += detalleTemporal.Cantidad; 
+            mensaje = $"Cantidad de {selectedProduct.Nombre} actualizada.";
+        }
+        else
+        {
+  
+            venta.DetalleVenta.Add(new DetalleVenta
+                {
+                    IdProducto = detalleTemporal.IdProducto,
+                    Cantidad = detalleTemporal.Cantidad,
+                    PrecioUnitario = selectedProduct.PrecioVenta, 
+                });
+            mensaje = $"{selectedProduct.Nombre} agregado al detalle de la venta.";
+        }
+
+        detalleTemporal = new(); 
+    }
+
+    private void EliminarDetalle(DetalleVenta itemToRemove)
+    {
+        venta.DetalleVenta.Remove(itemToRemove);
+        mensaje = "Producto eliminado del detalle de la venta.";
+    }
+
+ 
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConsultarTodos();
+        await CargarDatosRelacionados();
+    }
+
+    private async Task CargarDatosRelacionados()
+    {
+        try
+        {
+            
+            listaClientes = await Http.GetFromJsonAsync<List<Cliente>>(clientesBaseUrl) ?? new();
+          
+            listaUsuarios = await Http.GetFromJsonAsync<List<Usuario>>(usuariosBaseUrl) ?? new();
+
+            listaSedes = await Http.GetFromJsonAsync<List<Sede>>(sedesBaseUrl) ?? new();
+            
+            listaProductos = await Http.GetFromJsonAsync<List<Producto>>($"{productosBaseUrl}/GetAll") ?? new();
+            
+            mensaje = "Datos relacionados cargados.";
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Error al cargar datos relacionados: {ex.Message}";
+            Console.WriteLine($"Exception loading related data: {ex.ToString()}");
+        }
+    }
+
+    
+    private void PaginaSiguiente()
+    {
+        if (paginaActual < totalPaginas)
+            paginaActual++;
+    }
+
+    private void PaginaAnterior()
+    {
+        if (paginaActual > 1)
+            paginaActual--;
+    }
+
+    private bool PuedeAvanzar => paginaActual < totalPaginas;
+    private bool PuedeRetroceder => paginaActual > 1;
+
+   
+
+    public class Cliente
+    {
+        public int IdCliente { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string Apellido { get; set; } = string.Empty;
+       
+    }
+
+    public class Usuario
+    {
+        public int IdUsuario { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string Apellido { get; set; } = string.Empty;
+        
+    }
+
+    public class Sede
+    {
+        public int IdSede { get; set; }
+        public string Nombre { get; set; } 
+      
+    }
+
+    public class Producto
+    {
+        public int IdProducto { get; set; }
+        public string Nombre { get; set; } 
+        public decimal PrecioVenta { get; set; }
+     
+    }
+
+    public class DetalleVenta
+    {
+        public int IdDetalle { get; set; } 
+        public int IdVenta { get; set; } 
+        public int? IdProducto { get; set; }
+        public int? Cantidad { get; set; } 
+        public decimal? PrecioUnitario { get; set; } 
+        public decimal? Subtotal { get; set; } 
+
+    }
+
+    public class Venta
+    {
+        public int IdVenta { get; set; }
+        [Required(ErrorMessage = "El cliente es obligatorio.")]
+        public int? IdCliente { get; set; }
+        [Required(ErrorMessage = "El usuario (vendedor) es obligatorio.")]
+        public int? IdUsuario { get; set; }
+        [Required(ErrorMessage = "La sede es obligatoria.")]
+        public int? IdSede { get; set; }
+        [Required(ErrorMessage = "La fecha de venta es obligatoria.")]
+        public DateOnly? FechaVenta { get; set; }
+        public decimal? TotalVenta { get; set; } 
+        [Required(ErrorMessage = "El tipo de venta es obligatorio.")]
+        public string? TipoVenta { get; set; }
+
+        public List<DetalleVenta> DetalleVenta { get; set; } = new List<DetalleVenta>();
+        
+    }
+}

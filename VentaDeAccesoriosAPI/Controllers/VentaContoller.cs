@@ -18,8 +18,8 @@ namespace VentaDeAccesoriosAPI.Controllers
         }
 
         // GET: api/ventas
-        [HttpGet]
-        [AllowAnonymous] // Permite acceso sin autenticación para pruebas
+        [HttpGet("GetAll")]
+        
         public async Task<ActionResult<IEnumerable<Venta>>> GetAll()
         {
             var ventas = await _ventasService.GetAll();
@@ -27,8 +27,8 @@ namespace VentaDeAccesoriosAPI.Controllers
         }
 
         // GET: api/ventas/{id}
-        [HttpGet("{id}")]
-        [AllowAnonymous] // Permite acceso sin autenticación para pruebas
+        [HttpGet("GetById/{id}")]
+        //[AllowAnonymous] // Permite acceso sin autenticación para pruebas
         public async Task<ActionResult<Venta>> GetById(int id)
         {
             var venta = await _ventasService.GetById(id);
@@ -38,9 +38,9 @@ namespace VentaDeAccesoriosAPI.Controllers
         }
 
         // POST: api/ventas
-        [HttpPost]
+        [HttpPost("Insert")]
         //[Authorize] // Habilita esta línea para requerir autorización en este método
-        [AllowAnonymous] // Temporal para pruebas sin autenticación
+        //[AllowAnonymous] // Temporal para pruebas sin autenticación
         public async Task<ActionResult> Insert(Venta venta)
         {
             var result = await _ventasService.Insert(venta);
@@ -51,7 +51,7 @@ namespace VentaDeAccesoriosAPI.Controllers
         }
 
         // PUT: api/ventas/{id}
-        [HttpPut("{id}")]
+        [HttpPut("Update/{id}")]
         //[Authorize]
         [AllowAnonymous] // Temporal para pruebas
         public async Task<ActionResult> Update(int id, Venta venta)
@@ -67,7 +67,7 @@ namespace VentaDeAccesoriosAPI.Controllers
         }
 
         // DELETE: api/ventas/{id}
-        [HttpDelete("{id}")]
+        [HttpDelete("Delete/{id}")]
         //[Authorize]
         [AllowAnonymous] // Temporal para pruebas
         public async Task<ActionResult> Delete(int id)
@@ -77,6 +77,13 @@ namespace VentaDeAccesoriosAPI.Controllers
                 return NotFound($"No se encontró la venta con id {id}");
 
             return NoContent();
+        }
+
+        [HttpGet("GetUltimo")]
+        public async Task<IActionResult> GetUltimo()
+        {
+            Venta venta = await _ventasService.GetUltimo();
+            return Ok(venta);
         }
     }
 }

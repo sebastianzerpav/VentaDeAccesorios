@@ -1,0 +1,462 @@
+﻿@page "/sedes"
+@layout MainLayout
+@inject HttpClient Http
+@using System.ComponentModel.DataAnnotations
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Gestión de Sedes</h3>
+                    </div>
+
+                    <EditForm Model="@sede" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <div class="card-body">
+                            <div class="card card-gray-dark">
+                                <div class="card-header">
+                                    <h3 class="card-title">Datos de la Sede</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="txtIdSede">ID Sede</label>
+                                                @if (sede.IdSede > 0)
+                                                {
+                                                    <InputNumber id="txtIdSede" class="form-control" @bind-Value="sede.IdSede" readonly />
+                                                }
+                                                else
+                                                {
+                                                    <input id="txtIdSede" class="form-control" value="[Auto Asignado]" disabled />
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="form-group">
+                                                <label for="txtNombre">Nombre <span class="text-danger">*</span></label>
+                                                <InputText id="txtNombre" class="form-control" @bind-Value="sede.Nombre" />
+                                                <ValidationMessage For="@(() => sede.Nombre)" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="form-group">
+                                                <label for="txtDireccion">Dirección</label>
+                                                <InputText id="txtDireccion" class="form-control" @bind-Value="sede.Direccion" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="txtBarrio">Barrio</label>
+                                                <InputText id="txtBarrio" class="form-control" @bind-Value="sede.Barrio" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="txtCiudad">Ciudad <span class="text-danger">*</span></label>
+                                                <InputText id="txtCiudad" class="form-control" @bind-Value="sede.Ciudad" />
+                                                <ValidationMessage For="@(() => sede.Ciudad)" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="txtPais">País <span class="text-danger">*</span></label>
+                                                <InputText id="txtPais" class="form-control" @bind-Value="sede.Pais" />
+                                                <ValidationMessage For="@(() => sede.Pais)" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="txtTelefono">Teléfono</label>
+                                                <InputText id="txtTelefono" class="form-control" @bind-Value="sede.Telefono" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="txtEmailContacto">Email de Contacto</label>
+                                                <InputText id="txtEmailContacto" class="form-control" @bind-Value="sede.EmailContacto" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card card-danger mt-3">
+                                
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <button type="submit" class="btn btn-success btn-block btn-lg">GUARDAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-warning btn-block btn-lg" @onclick="UpdateSede">ACTUALIZAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Buscar">CONSULTAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn-secondary btn-block btn-lg" @onclick="LimpiarFormulario">LIMPIAR</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h3 class="card-title mt-3">Filtros de Búsqueda</h3>
+                                    <div class="row mt-2 mb-3">
+                                        <div class="col-md-4">
+                                            <InputText @bind-Value="searchCiudad" class="form-control" placeholder="Buscar por Ciudad" />
+                                        </div>
+                                        <div class="col-md-4">
+                                            <InputText @bind-Value="searchBarrio" class="form-control" placeholder="Buscar por Barrio" />
+                                        </div>
+                                        <div class="col-md-4">
+                                            <InputText @bind-Value="searchPais" class="form-control" placeholder="Buscar por País" />
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-12 text-center">
+                                            <button type="button" class="btn btn-info" @onclick="ExecuteSearch">Aplicar Filtros</button>
+                                            <button type="button" class="btn btn-secondary ml-2" @onclick="ClearSearchFilters">Limpiar Filtros</button>
+                                        </div>
+                                    </div>
+
+                                    <table id="tblSedes" class="table table-bordered table-striped" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>ID Sede</th>
+                                                <th>Nombre</th>
+                                                <th>Dirección</th>
+                                                <th>Barrio</th>
+                                                <th>Ciudad</th>
+                                                <th>País</th>
+                                                <th>Teléfono</th>
+                                                <th>Email Contacto</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (sedesPaginadas != null && sedesPaginadas.Any())
+                                            {
+                                                @foreach (var s in sedesPaginadas)
+                                                {
+                                                    <tr>
+                                                        <td>@s.IdSede</td>
+                                                        <td>@s.Nombre</td>
+                                                        <td>@s.Direccion</td>
+                                                        <td>@s.Barrio</td>
+                                                        <td>@s.Ciudad</td>
+                                                        <td>@s.Pais</td>
+                                                        <td>@s.Telefono</td>
+                                                        <td>@s.EmailContacto</td>
+                                                        <td class="text-center" style="white-space: nowrap; width: 1%;">
+                                                            <div class="d-flex flex-row justify-content-center gap-1">
+                                                                <button class="btn btn-info btn-sm p-1" @onclick="() => SeleccionarSede(s)">Seleccionar</button>
+                                                                <button class="btn btn-danger btn-sm p-1" @onclick="() => EliminarSede(s.IdSede)">Eliminar</button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="9" class="text-center">No hay sedes para mostrar.</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <button class="btn btn-secondary" @onclick="PaginaAnterior" disabled="@(!PuedeRetroceder)">Anterior</button>
+                                        <span>Página @paginaActual de @totalPaginas</span>
+                                        <button class="btn btn-secondary" @onclick="PaginaSiguiente" disabled="@(!PuedeAvanzar)">Siguiente</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+
+                    <div class="card-footer">
+                        <div id="dvMensaje">@mensaje</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private int paginaActual = 1;
+    private int tamanoPagina = 5;
+    private int totalPaginas => (int)Math.Ceiling((double)listaSedes.Count / tamanoPagina);
+    private IEnumerable<Sede> sedesPaginadas => listaSedes
+        .Skip((paginaActual - 1) * tamanoPagina)
+        .Take(tamanoPagina);
+
+    private string sedesBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Sede";
+
+    private List<Sede> listaSedes = new();
+    private Sede sede = new();
+    private string mensaje = "";
+
+    // Search filters
+    private string? searchCiudad;
+    private string? searchBarrio;
+    private string? searchPais;
+
+    // Data Annotation for model (assuming you'll define this in your Sede model file)
+    // For now, these are placeholder properties for required validation
+    public class Sede
+    {
+        public int IdSede { get; set; }
+
+        [Required(ErrorMessage = "El nombre de la sede es obligatorio.")]
+        public string? Nombre { get; set; }
+
+        public string? Direccion { get; set; }
+
+        public string? Barrio { get; set; }
+
+        [Required(ErrorMessage = "La ciudad es obligatoria.")]
+        public string? Ciudad { get; set; }
+
+        [Required(ErrorMessage = "El país es obligatorio.")]
+        public string? Pais { get; set; }
+
+        public string? Telefono { get; set; }
+
+        [EmailAddress(ErrorMessage = "Formato de email inválido.")]
+        public string? EmailContacto { get; set; }
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConsultarTodos();
+    }
+
+    private void HandleValidSubmit()
+    {
+        Insert();
+    }
+
+    private async Task Insert()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync($"{sedesBaseUrl}/Insert", sede);
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = "Sede insertada exitosamente.";
+                await LimpiarFormulario();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                mensaje = $"Error al insertar sede: {response.ReasonPhrase} - {errorContent}";
+                Console.WriteLine($"API Error: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al insertar: {ex.Message}";
+            Console.WriteLine($"Exception: {ex.ToString()}");
+        }
+    }
+
+    private async Task UpdateSede()
+    {
+        if (sede.IdSede <= 0)
+        {
+            mensaje = "Debe seleccionar una sede para actualizar.";
+            return;
+        }
+
+        // Basic validation for required fields
+        if (string.IsNullOrWhiteSpace(sede.Nombre) || string.IsNullOrWhiteSpace(sede.Ciudad) || string.IsNullOrWhiteSpace(sede.Pais))
+        {
+            mensaje = "Por favor, complete los campos obligatorios (Nombre, Ciudad, País).";
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"{sedesBaseUrl}/Update/{sede.IdSede}", sede);
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = "Sede actualizada exitosamente.";
+                await LimpiarFormulario();
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                mensaje = $"Error al actualizar sede: {response.ReasonPhrase} - {errorContent}";
+                Console.WriteLine($"API Error: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al actualizar: {ex.Message}";
+            Console.WriteLine($"Exception: {ex.ToString()}");
+        }
+    }
+
+    private async Task Buscar()
+    {
+        if (sede.IdSede > 0)
+        {
+            try
+            {
+                var result = await Http.GetFromJsonAsync<Sede>($"{sedesBaseUrl}/GetById/{sede.IdSede}");
+                paginaActual = 1;
+                if (result != null)
+                {
+                    listaSedes = new List<Sede> { result };
+                    sede = result;
+                    mensaje = "Sede encontrada por ID.";
+                }
+                else
+                {
+                    listaSedes = new();
+                    mensaje = "Sede no encontrada.";
+                }
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error de consulta por ID: {ex.Message}";
+                Console.WriteLine($"Exception: {ex.ToString()}");
+            }
+        }
+        else
+        {
+            mensaje = "Por favor, ingrese un ID de Sede para buscar o use los filtros para consultar todas.";
+            await ConsultarTodos(); // If no ID, show all
+        }
+    }
+
+    private async Task ConsultarTodos()
+    {
+        try
+        {
+            var sedes = await Http.GetFromJsonAsync<List<Sede>>($"{sedesBaseUrl}/GetAll") ?? new();
+            listaSedes = sedes.OrderBy(s => s.IdSede).ToList();
+            mensaje = "Consulta de sedes exitosa.";
+            paginaActual = 1;
+        }
+        catch (Exception ex)
+        {
+            listaSedes = new();
+            mensaje = $"Error al consultar todas las sedes: {ex.Message}";
+            Console.WriteLine($"Exception: {ex.ToString()}");
+        }
+    }
+
+    private async Task ExecuteSearch()
+    {
+        try
+        {
+            var queryParams = new List<string>();
+            if (!string.IsNullOrWhiteSpace(searchCiudad))
+                queryParams.Add($"ciudad={Uri.EscapeDataString(searchCiudad)}");
+            if (!string.IsNullOrWhiteSpace(searchBarrio))
+                queryParams.Add($"barrio={Uri.EscapeDataString(searchBarrio)}");
+            if (!string.IsNullOrWhiteSpace(searchPais))
+                queryParams.Add($"pais={Uri.EscapeDataString(searchPais)}");
+
+            string url = $"{sedesBaseUrl}/search";
+            if (queryParams.Any())
+            {
+                url += "?" + string.Join("&", queryParams);
+            }
+            
+            var sedes = await Http.GetFromJsonAsync<List<Sede>>(url) ?? new();
+            listaSedes = sedes.OrderBy(s => s.IdSede).ToList();
+            mensaje = $"Búsqueda de sedes completada. Se encontraron {listaSedes.Count} resultados.";
+            paginaActual = 1; // Reset to first page after search
+        }
+        catch (Exception ex)
+        {
+            listaSedes = new();
+            mensaje = $"Error al realizar la búsqueda: {ex.Message}";
+            Console.WriteLine($"Exception: {ex.ToString()}");
+        }
+    }
+
+    private async Task ClearSearchFilters()
+    {
+        searchCiudad = null;
+        searchBarrio = null;
+        searchPais = null;
+        mensaje = "Filtros de búsqueda limpiados.";
+        await ConsultarTodos(); // Reload all data after clearing filters
+    }
+
+    private void SeleccionarSede(Sede s)
+    {
+        sede = new Sede
+        {
+            IdSede = s.IdSede,
+            Nombre = s.Nombre,
+            Direccion = s.Direccion,
+            Barrio = s.Barrio,
+            Ciudad = s.Ciudad,
+            Pais = s.Pais,
+            Telefono = s.Telefono,
+            EmailContacto = s.EmailContacto
+        };
+        mensaje = $"Sede {s.Nombre} (ID: {s.IdSede}) seleccionada.";
+    }
+
+    private async Task EliminarSede(int id)
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"{sedesBaseUrl}/Delete/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = $"Sede con ID {id} eliminada correctamente.";
+                await LimpiarFormulario(); // Also reloads all sedes
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                mensaje = $"Error al eliminar sede: {response.ReasonPhrase} - {errorContent}";
+                Console.WriteLine($"API Error: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al eliminar: {ex.Message}";
+            Console.WriteLine($"Exception: {ex.ToString()}");
+        }
+    }
+
+    private async Task LimpiarFormulario()
+    {
+        sede = new Sede();
+        mensaje = "Formulario limpio.";
+        await ConsultarTodos(); // Reload all sedes after clearing form
+    }
+
+    private void PaginaSiguiente()
+    {
+        if (paginaActual < totalPaginas)
+            paginaActual++;
+    }
+
+    private void PaginaAnterior()
+    {
+        if (paginaActual > 1)
+            paginaActual--;
+    }
+
+    private bool PuedeAvanzar => paginaActual < totalPaginas;
+    private bool PuedeRetroceder => paginaActual > 1;
+}
