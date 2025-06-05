@@ -1,0 +1,432 @@
+﻿@page "/clientes"
+@layout MainLayout
+@inject HttpClient Http
+@using System.ComponentModel.DataAnnotations
+
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Clientes</h3>
+                    </div>
+
+                    <EditForm Model="@cliente" OnValidSubmit="HandleValidSubmit">
+                        <div class="card-body">
+                            <div class="card card-gray-dark">
+                                <div class="card-header">
+                                    <h3 class="card-title">Datos de Cliente</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-1">
+                                            <div class="form-group">
+                                                <label for="txtID">ID</label>
+                                                <InputNumber id="txtID" class="form-control" @bind-Value="cliente.IdCliente" min="0" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="txtNombre">Nombre <span class="text-danger">*</span></label>
+                                                <InputText id="txtNombre" class="form-control" @bind-Value="cliente.Nombre" required />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="txtApellido">Apellido <span class="text-danger">*</span></label>
+                                                <InputText id="txtApellido" class="form-control" @bind-Value="cliente.Apellido" required />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-5">
+                                            <div class="form-group">
+                                                <label for="txtCorreo">Correo <span class="text-danger">*</span></label>
+                                                <InputText id="txtCorreo" class="form-control" @bind-Value="cliente.CorreoElectronico" type="email" required />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="txtDireccion">Dirección <span class="text-danger">*</span></label>
+                                                <InputText id="txtDireccion" class="form-control" @bind-Value="cliente.Direccion" required />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="txtTelefono">Teléfono <span class="text-danger">*</span></label>
+                                                <InputText id="txtTelefono" class="form-control" @bind-Value="cliente.Telefono" required />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card card-danger mt-3">
+                                <div class="card-header">
+                                    <h3 class="card-title">PROCESO</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-success btn-block btn-lg" @onclick="Insert">INSERTAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-warning btn-block btn-lg" @onclick="Update">ACTUALIZAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-primary btn-block btn-lg" @onclick="Buscar">CONSULTAR</button>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn-secondary btn-block btn-lg" @onclick="LimpiarFormulario">LIMPIAR</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <table id="tblClientes" class="table table-bordered table-striped" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Nombre</th>
+                                                <th>Apellido</th>
+                                                <th>Correo</th>
+                                                <th>Dirección</th>
+                                                <th>Teléfono</th>
+                                                <th>Estado</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var c in clientesPaginados)
+                                            {
+                                                <tr>
+                                                    <td>@c.IdCliente</td>
+                                                    <td>@c.Nombre</td>
+                                                    <td>@c.Apellido</td>
+                                                    <td>@c.CorreoElectronico</td>
+                                                    <td>@c.Direccion</td>
+                                                    <td>@c.Telefono</td>
+                                                    <td>@(c.Estado ? "Activo" : "Inactivo")</td>
+                                                    <td class="text-center" style="white-space: nowrap; width: 1%;">
+                                                        <div class="d-flex flex-row justify-content-center gap-1">
+                                                            <button class="btn btn-info btn-sm p-1" @onclick="() => SeleccionarCliente(c)">Seleccionar</button>
+                                                            <button class="btn btn-warning btn-sm p-1" @onclick="() => CambiarEstado(c)">Cambiar Estado</button>
+                                                            <button class="btn btn-danger btn-sm p-1" @onclick="() => EliminarCliente(c.IdCliente)">Eliminar</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <button class="btn btn-secondary" @onclick="PaginaAnterior" disabled="@(!PuedeRetroceder)">Anterior</button>
+
+                                        <span>Página @paginaActual de @totalPaginas</span>
+
+                                        <button class="btn btn-secondary" @onclick="PaginaSiguiente" disabled="@(!PuedeAvanzar)">Siguiente</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </EditForm>
+
+                    <div class="card-footer">
+                        <div id="dvMensaje">@mensaje</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private int paginaActual = 1;
+    private int tamanoPagina = 5;
+    private int totalPaginas => (int)Math.Ceiling((double)listaClientes.Count / tamanoPagina);
+
+    private IEnumerable<Cliente> clientesPaginados => listaClientes
+        .Skip((paginaActual - 1) * tamanoPagina)
+        .Take(tamanoPagina);
+
+    private string baseUrl = "http://tiendadeaccesorios.runasp.net/api/Cliente"; // Ensure this matches your API base URL
+    private List<Cliente> listaClientes = new();
+    private Cliente cliente = new();
+    private string mensaje = "";
+
+    private void HandleValidSubmit()
+    {
+        mensaje = "Formulario válido.";
+    }
+
+    private async Task Insert()
+    {
+        if (string.IsNullOrWhiteSpace(cliente.Nombre) ||
+            string.IsNullOrWhiteSpace(cliente.Apellido) ||
+            string.IsNullOrWhiteSpace(cliente.CorreoElectronico) ||
+            string.IsNullOrWhiteSpace(cliente.Direccion) ||
+            string.IsNullOrWhiteSpace(cliente.Telefono))
+        {
+            mensaje = "Todos los campos son obligatorios.";
+            return;
+        }
+
+        // Validar que el correo sea válido
+        if (!cliente.CorreoElectronico.Contains("@") || !cliente.CorreoElectronico.Contains("."))
+        {
+            mensaje = "El correo ingresado no es válido.";
+            return;
+        }
+
+        try
+        {
+            var nuevoCliente = new Cliente
+                {
+                    Nombre = cliente.Nombre,
+                    Apellido = cliente.Apellido,
+                    CorreoElectronico = cliente.CorreoElectronico,
+                    Direccion = cliente.Direccion,
+                    Telefono = cliente.Telefono,
+                    Estado = true // Nuevo cliente activo por defecto
+                };
+
+            string Url = $"{baseUrl}"; // POST to base URL for Insert
+            var response = await Http.PostAsJsonAsync(Url, nuevoCliente);
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = "Cliente insertado exitosamente.";
+                cliente = new Cliente(); // Clear form
+                paginaActual = 1; // Reset pagination to first page
+                await ConsultarTodos();
+            }
+            else
+            {
+                mensaje = $"Error al insertar cliente: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al insertar: {ex.Message}";
+        }
+    }
+
+    private async Task Update()
+    {
+        if (cliente.IdCliente <= 0)
+        {
+            mensaje = "Debe seleccionar un cliente para actualizar.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(cliente.Nombre) ||
+            string.IsNullOrWhiteSpace(cliente.Apellido) ||
+            string.IsNullOrWhiteSpace(cliente.CorreoElectronico) ||
+            string.IsNullOrWhiteSpace(cliente.Direccion) ||
+            string.IsNullOrWhiteSpace(cliente.Telefono))
+        {
+            mensaje = "Todos los campos son obligatorios.";
+            return;
+        }
+
+        // Validar que el correo sea válido
+        if (!cliente.CorreoElectronico.Contains("@") || !cliente.CorreoElectronico.Contains("."))
+        {
+            mensaje = "El correo ingresado no es válido.";
+            return;
+        }
+
+        try
+        {
+            string Url = $"{baseUrl}/{cliente.IdCliente}"; // PUT to /api/Cliente/{id}
+            var response = await Http.PutAsJsonAsync(Url, cliente);
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = "Cliente actualizado exitosamente.";
+                cliente = new Cliente(); // Clear form
+                await ConsultarTodos();
+            }
+            else
+            {
+                mensaje = $"Error al actualizar cliente: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al actualizar: {ex.Message}";
+        }
+    }
+
+    private async Task Buscar()
+    {
+        if (cliente.IdCliente > 0)
+        {
+            // Buscar por ID
+            try
+            {
+                string Url = $"{baseUrl}/{cliente.IdCliente}"; // GET to /api/Cliente/{id}
+                var result = await Http.GetFromJsonAsync<Cliente>(Url);
+                paginaActual = 1; // Reset pagination
+                if (result != null)
+                {
+                    listaClientes = new List<Cliente> { result }; // Display only the found client
+                    cliente = result; // Populate form with found client
+                    mensaje = "Cliente encontrado por ID.";
+                }
+                else
+                {
+                    listaClientes = new();
+                    mensaje = "Cliente no encontrado.";
+                }
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error de consulta por ID: {ex.Message}";
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(cliente.Nombre))
+        {
+            // Assuming you might add a "GetByName" endpoint to ClienteController later,
+            // for now, we'll search locally or just default to ConsultarTodos if no ID.
+            // If you implement a GetByName for Cliente, adjust this section.
+            mensaje = "La búsqueda por nombre no está implementada directamente en el API de Clientes. Intenta con el ID o consulta todos.";
+            await ConsultarTodos(); // Fallback to display all if only name is entered for search
+        }
+        else
+        {
+            mensaje = "Por favor, ingresa un ID para buscar o presiona Consultar para ver todos.";
+            await ConsultarTodos(); // If no ID or name, show all clients.
+        }
+    }
+
+    private async Task ConsultarTodos()
+    {
+        try
+        {
+            string Url = $"{baseUrl}"; // GET to base URL for GetAll
+            var clientes = await Http.GetFromJsonAsync<List<Cliente>>(Url) ?? new();
+
+            listaClientes = clientes.OrderByDescending(c => c.IdCliente).ToList();
+            mensaje = "Consulta de clientes exitosa.";
+            paginaActual = 1; // Reset pagination when all are consulted
+        }
+        catch (Exception ex)
+        {
+            listaClientes = new();
+            mensaje = $"Error al consultar todos los clientes: {ex.Message}";
+        }
+    }
+
+    private async Task SeleccionarCliente(Cliente c)
+    {
+        cliente = new Cliente
+            {
+                IdCliente = c.IdCliente,
+                Nombre = c.Nombre,
+                Apellido = c.Apellido,
+                CorreoElectronico = c.CorreoElectronico,
+                Direccion = c.Direccion,
+                Telefono = c.Telefono,
+                Estado = c.Estado
+            };
+        mensaje = $"Cliente {c.Nombre} seleccionado.";
+    }
+
+    private async Task CambiarEstado(Cliente c)
+    {
+        try
+        {
+            c.Estado = !c.Estado; // Toggle the state
+
+            string url = $"{baseUrl}/{c.IdCliente}"; // PUT to /api/Cliente/{id}
+            var response = await Http.PutAsJsonAsync(url, c); // Send the updated client object
+
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = $"Estado de {c.Nombre} actualizado a {(c.Estado ? "Activo" : "Inactivo")}.";
+                await ConsultarTodos(); // Refresh list to reflect changes
+            }
+            else
+            {
+                mensaje = $"Error al actualizar estado: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al cambiar estado: {ex.Message}";
+        }
+    }
+
+    private async Task EliminarCliente(int id)
+    {
+        try
+        {
+            string Url = $"{baseUrl}/{id}"; // DELETE to /api/Cliente/{id}
+            var response = await Http.DeleteAsync(Url);
+            if (response.IsSuccessStatusCode)
+            {
+                mensaje = $"Cliente con ID {id} eliminado correctamente.";
+                await ConsultarTodos(); // Refresh list after deletion
+            }
+            else
+            {
+                mensaje = $"Error al eliminar cliente: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Excepción al eliminar: {ex.Message}";
+        }
+    }
+
+    private async Task LimpiarFormulario()
+    {
+        cliente = new Cliente(); // Reset to a new, empty client object
+        mensaje = "Formulario limpio.";
+        await ConsultarTodos(); // Refresh the list
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConsultarTodos();
+    }
+
+    private void PaginaSiguiente()
+    {
+        if (paginaActual < totalPaginas)
+            paginaActual++;
+    }
+
+    private void PaginaAnterior()
+    {
+        if (paginaActual > 1)
+            paginaActual--;
+    }
+
+    private bool PuedeAvanzar => paginaActual < totalPaginas;
+    private bool PuedeRetroceder => paginaActual > 1;
+
+    // Define the Cliente class here, or ideally in a shared project/folder
+    // E.g., VentaDeAccesoriosAPI.Data.Models.Cliente
+    public class Cliente
+    {
+        public int IdCliente { get; set; }
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
+        public string Nombre { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El apellido es obligatorio.")]
+        public string Apellido { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
+        [EmailAddress(ErrorMessage = "El formato del correo electrónico no es válido.")]
+        public string CorreoElectronico { get; set; } = string.Empty;
+        [Required(ErrorMessage = "La dirección es obligatoria.")]
+        public string Direccion { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El teléfono es obligatorio.")]
+        public string Telefono { get; set; } = string.Empty;
+        public bool Estado { get; set; } = true; // Default to active
+    }
+}
