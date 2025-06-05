@@ -153,7 +153,7 @@
         .Skip((paginaActual - 1) * tamanoPagina)
         .Take(tamanoPagina);
 
-    private string baseUrl = "http://tiendadeaccesorios.runasp.net/api/Cliente"; // Ensure this matches your API base URL
+    private string baseUrl = "http://tiendadeaccesorios.runasp.net/api/Cliente"; 
     private List<Cliente> listaClientes = new();
     private Cliente cliente = new();
     private string mensaje = "";
@@ -194,13 +194,13 @@
                     Estado = true // Nuevo cliente activo por defecto
                 };
 
-            string Url = $"{baseUrl}"; // POST to base URL for Insert
+            string Url = $"{baseUrl}"; 
             var response = await Http.PostAsJsonAsync(Url, nuevoCliente);
             if (response.IsSuccessStatusCode)
             {
                 mensaje = "Cliente insertado exitosamente.";
-                cliente = new Cliente(); // Clear form
-                paginaActual = 1; // Reset pagination to first page
+                cliente = new Cliente(); 
+                paginaActual = 1; 
                 await ConsultarTodos();
             }
             else
@@ -241,12 +241,12 @@
 
         try
         {
-            string Url = $"{baseUrl}/{cliente.IdCliente}"; // PUT to /api/Cliente/{id}
+            string Url = $"{baseUrl}/{cliente.IdCliente}"; 
             var response = await Http.PutAsJsonAsync(Url, cliente);
             if (response.IsSuccessStatusCode)
             {
                 mensaje = "Cliente actualizado exitosamente.";
-                cliente = new Cliente(); // Clear form
+                cliente = new Cliente(); 
                 await ConsultarTodos();
             }
             else
@@ -267,13 +267,13 @@
             // Buscar por ID
             try
             {
-                string Url = $"{baseUrl}/{cliente.IdCliente}"; // GET to /api/Cliente/{id}
+                string Url = $"{baseUrl}/{cliente.IdCliente}"; 
                 var result = await Http.GetFromJsonAsync<Cliente>(Url);
-                paginaActual = 1; // Reset pagination
+                paginaActual = 1; 
                 if (result != null)
                 {
-                    listaClientes = new List<Cliente> { result }; // Display only the found client
-                    cliente = result; // Populate form with found client
+                    listaClientes = new List<Cliente> { result }; 
+                    cliente = result; 
                     mensaje = "Cliente encontrado por ID.";
                 }
                 else
@@ -289,16 +289,14 @@
         }
         else if (!string.IsNullOrWhiteSpace(cliente.Nombre))
         {
-            // Assuming you might add a "GetByName" endpoint to ClienteController later,
-            // for now, we'll search locally or just default to ConsultarTodos if no ID.
-            // If you implement a GetByName for Cliente, adjust this section.
+            
             mensaje = "La búsqueda por nombre no está implementada directamente en el API de Clientes. Intenta con el ID o consulta todos.";
-            await ConsultarTodos(); // Fallback to display all if only name is entered for search
+            await ConsultarTodos();
         }
         else
         {
             mensaje = "Por favor, ingresa un ID para buscar o presiona Consultar para ver todos.";
-            await ConsultarTodos(); // If no ID or name, show all clients.
+            await ConsultarTodos(); 
         }
     }
 
@@ -306,12 +304,12 @@
     {
         try
         {
-            string Url = $"{baseUrl}"; // GET to base URL for GetAll
+            string Url = $"{baseUrl}"; 
             var clientes = await Http.GetFromJsonAsync<List<Cliente>>(Url) ?? new();
 
             listaClientes = clientes.OrderByDescending(c => c.IdCliente).ToList();
             mensaje = "Consulta de clientes exitosa.";
-            paginaActual = 1; // Reset pagination when all are consulted
+            paginaActual = 1; 
         }
         catch (Exception ex)
         {
@@ -339,15 +337,15 @@
     {
         try
         {
-            c.Estado = !c.Estado; // Toggle the state
+            c.Estado = !c.Estado; 
 
-            string url = $"{baseUrl}/{c.IdCliente}"; // PUT to /api/Cliente/{id}
-            var response = await Http.PutAsJsonAsync(url, c); // Send the updated client object
+            string url = $"{baseUrl}/{c.IdCliente}"; 
+            var response = await Http.PutAsJsonAsync(url, c); 
 
             if (response.IsSuccessStatusCode)
             {
                 mensaje = $"Estado de {c.Nombre} actualizado a {(c.Estado ? "Activo" : "Inactivo")}.";
-                await ConsultarTodos(); // Refresh list to reflect changes
+                await ConsultarTodos(); 
             }
             else
             {
@@ -364,12 +362,12 @@
     {
         try
         {
-            string Url = $"{baseUrl}/{id}"; // DELETE to /api/Cliente/{id}
+            string Url = $"{baseUrl}/{id}"; 
             var response = await Http.DeleteAsync(Url);
             if (response.IsSuccessStatusCode)
             {
                 mensaje = $"Cliente con ID {id} eliminado correctamente.";
-                await ConsultarTodos(); // Refresh list after deletion
+                await ConsultarTodos(); 
             }
             else
             {
@@ -384,9 +382,9 @@
 
     private async Task LimpiarFormulario()
     {
-        cliente = new Cliente(); // Reset to a new, empty client object
+        cliente = new Cliente(); 
         mensaje = "Formulario limpio.";
-        await ConsultarTodos(); // Refresh the list
+        await ConsultarTodos(); 
     }
 
     protected override async Task OnInitializedAsync()
@@ -409,8 +407,7 @@
     private bool PuedeAvanzar => paginaActual < totalPaginas;
     private bool PuedeRetroceder => paginaActual > 1;
 
-    // Define the Cliente class here, or ideally in a shared project/folder
-    // E.g., VentaDeAccesoriosAPI.Data.Models.Cliente
+ 
     public class Cliente
     {
         public int IdCliente { get; set; }
@@ -425,6 +422,6 @@
         public string Direccion { get; set; } = string.Empty;
         [Required(ErrorMessage = "El teléfono es obligatorio.")]
         public string Telefono { get; set; } = string.Empty;
-        public bool Estado { get; set; } = true; // Default to active
+        public bool Estado { get; set; } = true; 
     }
 }

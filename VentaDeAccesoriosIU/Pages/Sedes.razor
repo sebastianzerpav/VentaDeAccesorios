@@ -206,13 +206,11 @@
     private Sede sede = new();
     private string mensaje = "";
 
-    // Search filters
     private string? searchCiudad;
     private string? searchBarrio;
     private string? searchPais;
 
-    // Data Annotation for model (assuming you'll define this in your Sede model file)
-    // For now, these are placeholder properties for required validation
+ 
     public class Sede
     {
         public int IdSede { get; set; }
@@ -279,7 +277,7 @@
             return;
         }
 
-        // Basic validation for required fields
+
         if (string.IsNullOrWhiteSpace(sede.Nombre) || string.IsNullOrWhiteSpace(sede.Ciudad) || string.IsNullOrWhiteSpace(sede.Pais))
         {
             mensaje = "Por favor, complete los campos obligatorios (Nombre, Ciudad, País).";
@@ -337,7 +335,7 @@
         else
         {
             mensaje = "Por favor, ingrese un ID de Sede para buscar o use los filtros para consultar todas.";
-            await ConsultarTodos(); // If no ID, show all
+            await ConsultarTodos(); 
         }
     }
 
@@ -379,7 +377,7 @@
             var sedes = await Http.GetFromJsonAsync<List<Sede>>(url) ?? new();
             listaSedes = sedes.OrderBy(s => s.IdSede).ToList();
             mensaje = $"Búsqueda de sedes completada. Se encontraron {listaSedes.Count} resultados.";
-            paginaActual = 1; // Reset to first page after search
+            paginaActual = 1; 
         }
         catch (Exception ex)
         {
@@ -395,7 +393,7 @@
         searchBarrio = null;
         searchPais = null;
         mensaje = "Filtros de búsqueda limpiados.";
-        await ConsultarTodos(); // Reload all data after clearing filters
+        await ConsultarTodos(); 
     }
 
     private void SeleccionarSede(Sede s)
@@ -422,7 +420,7 @@
             if (response.IsSuccessStatusCode)
             {
                 mensaje = $"Sede con ID {id} eliminada correctamente.";
-                await LimpiarFormulario(); // Also reloads all sedes
+                await LimpiarFormulario(); 
             }
             else
             {
@@ -442,7 +440,7 @@
     {
         sede = new Sede();
         mensaje = "Formulario limpio.";
-        await ConsultarTodos(); // Reload all sedes after clearing form
+        await ConsultarTodos(); 
     }
 
     private void PaginaSiguiente()
