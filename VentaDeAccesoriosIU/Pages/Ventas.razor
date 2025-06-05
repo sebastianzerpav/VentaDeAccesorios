@@ -77,26 +77,26 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="dtFechaVenta">Fecha de Venta <span class="text-danger">*</span></label>
                                                 <InputDate id="dtFechaVenta" class="form-control" @bind-Value="venta.FechaVenta" required />
                                                 <ValidationMessage For="@(() => venta.FechaVenta)" />
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="txtTipoVenta">Tipo de Venta <span class="text-danger">*</span></label>
                                                 <InputText id="txtTipoVenta" class="form-control" @bind-Value="venta.TipoVenta" required />
                                                 <ValidationMessage For="@(() => venta.TipoVenta)" />
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                      @*   <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="txtTotalVenta">Total Venta</label>
                                                 <InputNumber id="txtTotalVenta" class="form-control" @bind-Value="venta.TotalVenta" readonly />
                                             </div>
-                                        </div>
+                                        </div> *@
                                     </div>
                                 </div>
                             </div>
@@ -114,7 +114,7 @@
                                                     <option value="">Seleccione un producto</option>
                                                     @foreach (var p in listaProductos)
                                                     {
-                                                        <option value="@p.IdProducto">@p.Nombre (@p.PrecioVenta.ToString("C"))</option>
+                                                        <option value="@p.IdProducto">@p.Nombre (@p.PrecioVenta)</option>
                                                     }
                                                 </InputSelect>
                                             </div>
@@ -198,7 +198,7 @@
                                                 <th>Vendedor</th>
                                                 <th>Sede</th>
                                                 <th>Fecha</th>
-                                                <th>Total</th>
+                                         @*        <th>Total</th> *@
                                                 <th>Tipo</th>
                                                 <th>Acciones</th>
                                             </tr>
@@ -212,7 +212,7 @@
                                                     <td>@(listaUsuarios.FirstOrDefault(u => u.IdUsuario == v.IdUsuario)?.Nombre)</td>
                                                     <td>@(listaSedes.FirstOrDefault(s => s.IdSede == v.IdSede)?.Nombre)</td>
                                                     <td>@v.FechaVenta?.ToShortDateString()</td>
-                                                    <td>@v.TotalVenta?.ToString("C")</td>
+                                         @*            <td>@v.TotalVenta?.ToString("C")</td> *@
                                                     <td>@v.TipoVenta</td>
                                                     <td class="text-center" style="white-space: nowrap; width: 1%;">
                                                         <div class="d-flex flex-row justify-content-center gap-1">
