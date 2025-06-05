@@ -69,7 +69,7 @@
                                                     <option value="">Seleccione una sede</option>
                                                     @foreach (var s in listaSedes)
                                                     {
-                                                        <option value="@s.IdSede">@s.NombreSede</option>
+                                                        <option value="@s.IdSede">@s.Nombre</option>
                                                     }
                                                 </InputSelect>
                                                 <ValidationMessage For="@(() => venta.IdSede)" />
@@ -114,7 +114,7 @@
                                                     <option value="">Seleccione un producto</option>
                                                     @foreach (var p in listaProductos)
                                                     {
-                                                        <option value="@p.IdProducto">@p.NombreProducto (@p.Precio.ToString("C"))</option>
+                                                        <option value="@p.IdProducto">@p.Nombre (@p.PrecioVenta.ToString("C"))</option>
                                                     }
                                                 </InputSelect>
                                             </div>
@@ -146,7 +146,7 @@
                                                 @foreach (var item in venta.DetalleVenta)
                                                 {
                                                     <tr>
-                                                        <td>@(listaProductos.FirstOrDefault(p => p.IdProducto == item.IdProducto)?.NombreProducto)</td>
+                                                        <td>@(listaProductos.FirstOrDefault(p => p.IdProducto == item.IdProducto)?.Nombre)</td>
                                                         <td>@item.Cantidad.GetValueOrDefault(0)</td>
                                                         <td>@item.PrecioUnitario.GetValueOrDefault(0m).ToString("C")</td>
                                                         <td>@((item.Cantidad.GetValueOrDefault(0) * item.PrecioUnitario.GetValueOrDefault(0m)).ToString("C"))</td>
@@ -209,7 +209,7 @@
                                                     <td>@v.IdVenta</td>
                                                     <td>@(listaClientes.FirstOrDefault(c => c.IdCliente == v.IdCliente)?.Nombre) @(listaClientes.FirstOrDefault(c => c.IdCliente == v.IdCliente)?.Apellido)</td>
                                                     <td>@(listaUsuarios.FirstOrDefault(u => u.IdUsuario == v.IdUsuario)?.Nombre)</td>
-                                                    <td>@(listaSedes.FirstOrDefault(s => s.IdSede == v.IdSede)?.NombreSede)</td>
+                                                    <td>@(listaSedes.FirstOrDefault(s => s.IdSede == v.IdSede)?.Nombre)</td>
                                                     <td>@v.FechaVenta?.ToShortDateString()</td>
                                                     <td>@v.TotalVenta?.ToString("C")</td>
                                                     <td>@v.TipoVenta</td>
@@ -255,7 +255,7 @@
     private string ventasBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Ventas";
     private string clientesBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Cliente";
     private string usuariosBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Usuario/GetAll";
-    private string productosBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Producto"; 
+    private string productosBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Productos";
     private string sedesBaseUrl = "http://tiendadeaccesorios.runasp.net/api/Sede/GetAll";
 
 
@@ -298,7 +298,7 @@
 
         try
         {
-            var response = await Http.PostAsJsonAsync(ventasBaseUrl, venta);
+            var response = await Http.PostAsJsonAsync($"{ventasBaseUrl}/Insert", venta);
             if (response.IsSuccessStatusCode)
             {
                 mensaje = "Venta insertada exitosamente.";
@@ -340,7 +340,7 @@
 
         try
         {
-            var response = await Http.PutAsJsonAsync($"{ventasBaseUrl}/{venta.IdVenta}", venta);
+            var response = await Http.PutAsJsonAsync($"{ventasBaseUrl}/Update/{venta.IdVenta}", venta);
             if (response.IsSuccessStatusCode)
             {
                 mensaje = "Venta actualizada exitosamente.";
@@ -366,7 +366,7 @@
         {
             try
             {
-                var result = await Http.GetFromJsonAsync<Venta>($"{ventasBaseUrl}/{venta.IdVenta}");
+                var result = await Http.GetFromJsonAsync<Venta>($"{ventasBaseUrl}/GetById/{venta.IdVenta}");
                 paginaActual = 1;
                 if (result != null)
                 {
@@ -397,7 +397,7 @@
     {
         try
         {
-            var ventas = await Http.GetFromJsonAsync<List<Venta>>(ventasBaseUrl) ?? new();
+            var ventas = await Http.GetFromJsonAsync<List<Venta>>($"{ventasBaseUrl}/GetAll") ?? new();
             listaVentas = ventas.OrderByDescending(v => v.IdVenta).ToList();
             mensaje = "Consulta de ventas exitosa.";
             paginaActual = 1;
@@ -431,7 +431,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"{ventasBaseUrl}/{id}");
+            var response = await Http.DeleteAsync($"{ventasBaseUrl}/Delete/{id}");
             if (response.IsSuccessStatusCode)
             {
                 mensaje = $"Venta con ID {id} eliminada correctamente.";
@@ -479,7 +479,7 @@
         if (existingDetail != null)
         {
             existingDetail.Cantidad += detalleTemporal.Cantidad; 
-            mensaje = $"Cantidad de {selectedProduct.NombreProducto} actualizada.";
+            mensaje = $"Cantidad de {selectedProduct.Nombre} actualizada.";
         }
         else
         {
@@ -488,9 +488,9 @@
                 {
                     IdProducto = detalleTemporal.IdProducto,
                     Cantidad = detalleTemporal.Cantidad,
-                    PrecioUnitario = selectedProduct.Precio, 
+                    PrecioUnitario = selectedProduct.PrecioVenta, 
                 });
-            mensaje = $"{selectedProduct.NombreProducto} agregado al detalle de la venta.";
+            mensaje = $"{selectedProduct.Nombre} agregado al detalle de la venta.";
         }
 
         detalleTemporal = new(); 
@@ -518,11 +518,11 @@
             listaClientes = await Http.GetFromJsonAsync<List<Cliente>>(clientesBaseUrl) ?? new();
           
             listaUsuarios = await Http.GetFromJsonAsync<List<Usuario>>(usuariosBaseUrl) ?? new();
-            
-            listaProductos = await Http.GetFromJsonAsync<List<Producto>>(productosBaseUrl) ?? new();
-            
-            listaSedes = await Http.GetFromJsonAsync<List<Sede>>(sedesBaseUrl) ?? new();
 
+            listaSedes = await Http.GetFromJsonAsync<List<Sede>>(sedesBaseUrl) ?? new();
+            
+            listaProductos = await Http.GetFromJsonAsync<List<Producto>>($"{productosBaseUrl}/GetAll") ?? new();
+            
             mensaje = "Datos relacionados cargados.";
         }
         catch (Exception ex)
@@ -569,15 +569,15 @@
     public class Sede
     {
         public int IdSede { get; set; }
-        public string NombreSede { get; set; } = string.Empty;
+        public string Nombre { get; set; } 
       
     }
 
     public class Producto
     {
         public int IdProducto { get; set; }
-        public string NombreProducto { get; set; } = string.Empty;
-        public decimal Precio { get; set; }
+        public string Nombre { get; set; } 
+        public decimal PrecioVenta { get; set; }
      
     }
 

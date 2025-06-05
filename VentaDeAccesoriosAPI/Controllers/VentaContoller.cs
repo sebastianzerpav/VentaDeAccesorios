@@ -18,7 +18,7 @@ namespace VentaDeAccesoriosAPI.Controllers
         }
 
         // GET: api/ventas
-        [HttpGet]
+        [HttpGet("GetAll")]
         
         public async Task<ActionResult<IEnumerable<Venta>>> GetAll()
         {
@@ -27,7 +27,7 @@ namespace VentaDeAccesoriosAPI.Controllers
         }
 
         // GET: api/ventas/{id}
-        [HttpGet("{id}")]
+        [HttpGet("GetById/{id}")]
         //[AllowAnonymous] // Permite acceso sin autenticación para pruebas
         public async Task<ActionResult<Venta>> GetById(int id)
         {
@@ -38,7 +38,7 @@ namespace VentaDeAccesoriosAPI.Controllers
         }
 
         // POST: api/ventas
-        [HttpPost]
+        [HttpPost("Insert")]
         //[Authorize] // Habilita esta línea para requerir autorización en este método
         //[AllowAnonymous] // Temporal para pruebas sin autenticación
         public async Task<ActionResult> Insert(Venta venta)
@@ -51,7 +51,7 @@ namespace VentaDeAccesoriosAPI.Controllers
         }
 
         // PUT: api/ventas/{id}
-        [HttpPut("{id}")]
+        [HttpPut("Update/{id}")]
         //[Authorize]
         [AllowAnonymous] // Temporal para pruebas
         public async Task<ActionResult> Update(int id, Venta venta)
@@ -67,7 +67,7 @@ namespace VentaDeAccesoriosAPI.Controllers
         }
 
         // DELETE: api/ventas/{id}
-        [HttpDelete("{id}")]
+        [HttpDelete("Delete/{id}")]
         //[Authorize]
         [AllowAnonymous] // Temporal para pruebas
         public async Task<ActionResult> Delete(int id)
